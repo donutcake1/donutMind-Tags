@@ -1,0 +1,16 @@
+{//;Custom games command}
+{//;May be used in other clans to give new users promotion & raise clan activity}
+{//;If you use this, don't forget to edit the game list}
+
+{embed;{embedbuild;
+    title:Games 🎰;
+    description:All games available at moment.{newline}{zws}Note: if you joined one game, you can't join another, so choose carefully;
+    fields.name:Promotion 🆙;
+    fields.value:Rules: {newline}{zws}Achieve 1st place at CQ 3 times. (Two promotions: in a row (haha, good joke));
+    fields.name:Captain ⚔;
+    fields.value: Show me what you can! Required CQ attacks by Sunday: 35 or more;
+    fields.inline:true;
+    footer.text: Sent by {username} at {timestamp;DD/MM/YYYY HH:mm:ss}, messageID: {messageid};
+    thumbnail.url:https://media.giphy.com/media/dGD5YHl8xW6c/giphy.gif;
+    color:{exec;randhex;api};
+}}

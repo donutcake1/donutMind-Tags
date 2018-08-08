@@ -1,0 +1,49 @@
+{//;    CuteHub by donutMind                    }
+{//;    Uses GNU GPLv3 License                  }
+{//;    Credits: byParallax for implementations }
+
+{//;Prevent users from running the command and redirect them to the "b!t cute" tag}
+    {if;!=;cute;{commandname};
+        {embed;
+            {embedbuild;
+                title:Something went wrong!;
+                color:EF576F;
+                description:You are not allowed to run this command, it is an external module from the CuteHub tag. Instead, you should consider running `b!t cute` or [browsing the code](https://github.com/donutcake1/blarg_tags/tree/master/cute).
+            }
+        }
+        {return} 
+    }
+
+{//;If the user's command doesn't have any arguments, send an information message}
+{if;!=;{argslength};0;;
+{embed;
+    {embedbuild;
+        title:CuteHub - Submit a link!;
+        color:{exec;randhex;api};
+        description:This subcommand allows you to submit an image or a gif that will be reviewed, and later implemented.{newline;2}**Accepted formats:** `jpg`, `jpeg`, `gif`, `png`;
+    }
+}
+{return}
+}
+
+{//;Check if the user's command is a valid image}
+{if;==;false;{regextest;{args;1};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};It seems like your submission isn't valid. Please run `b!t cute submit` for more information.{return}}
+
+{//;Confirm to the user}
+Thanks! Your submission will be reviewed shortly, and we will make sure to inform you as soon as it gets approved.
+
+{//;Define the webhook's credentials}
+{set;webhook_id;{get;@cute_webhook_id}}
+{set;webhook_token;{get;@cute_webhook_token}}
+
+{//;Send the webhook with the submission}
+{webhook;
+    {get;webhook_id};
+    {get;webhook_token};
+    New submission for **`CuteHub`** from {username}#{userdiscrim} ({userid}){newline;2}Link: {args;1};
+    {embedbuild;
+        title:Preview of the {if;{args;1};endswith;gif;GIF;Image};
+        color:{exec;randhex;api};
+        image.url:{args;1};
+    }
+}

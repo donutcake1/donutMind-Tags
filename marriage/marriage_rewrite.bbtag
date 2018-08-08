@@ -1,0 +1,80 @@
+{//;Rewrite}
+{//;Version 0.2.7 - Experimental}
+{//;Any pull request to this code will be declined}
+{//;Add pull requests to live version instead}
+
+{//;Todo list (compared to live version)
+    1. Basic functions (accept & proposal first);
+    2. Data handling;
+    3. Compact help menu
+    4. Make everything looks nice (very last stage, unneccessary)
+}
+
+{//;Suppress any verbose output (errors, user data, etc.) from the tag}
+{suppresslookup;true}
+
+{//;Check if it is tag or imported command}
+{if;{iscc};{set;~p;{prefix}t};{set;~p;{prefix}}}
+
+
+{switch;{lower;{get;~args}};
+    accept;
+        {//;Get userID from the input}
+        {set;~user;{userid;{args;1}}}
+        {//;Check conditions:   isMarried, isProposed, isDivorced, isOnServer}
+        {if;@{userid}married;==;true;Wait, harems aren't supported! (yet){return}}
+        {if;@{get;~user}married;==;true;Wait, harems aren't supported! (yet){return}}
+        {if;@{get;~user}divorced;==;true;Hey, you need to wait a month before you can marry this user again!{return}}
+        {if;@{userid}divorced;==;true;Hey, you can't accept proposal of {get;~user}, you divorced with this user not so long ago!{return}}
+        {if;{userjoinedat;{get;~user}};==0;This user is not on server!{return}}
+        {embedbuild;
+            title:Congratulations!;
+            description:You and {username;{get;~user}} are married!;
+            color:{exec;randhex;api};
+        }
+    ;
+
+    propose;
+
+        {//;Check conditions}
+        {//;isMarried}
+        {if;@{userid}married;==;true;Wait, harems aren't supported! (yet){return}}
+        {if;@{get;~user}married;==;true;Wait, harems aren't supported! (yet){return}}
+
+        {//;isSelf}
+        {if;{get;~user};==;{userid};You cannot propose to yourself!}
+
+        {//;isPropose(-d)}
+        {if;{get;@{get;~user}proposed;2};==;true;This user has already proposed to someone else!{return}}
+        {if;{get;@{userid}proposed;2};==;true;You already proposed to someone else! Wait until this user accepts or declines your proposal.{return}}
+        {if;{get;@{get;~user}propose;2};==;true;This user hasn't answered to your proposal! Please ping that user to speed up the process.{return}}
+
+        {//;isOnServer}
+        {if;{logic;&&;{userjoinedat;{get;~user}};false};==;false;This user is not on server!{return}}
+
+        {//;isDivorced}
+        {if;@{get;~user}divorced;==;true;Hey, you need to wait a month before you can marry this user again!{return}}
+        {if;@{userid}divorced;==;true;Hey, you can't propose to {get;~user}, you divorced with this user not so long ago!{return}}
+
+        {embedbuild;
+            title:Propose;
+            description:You proposed to {username;{get;~user}}.{newline}Now wait until {username;{get;~user}} accepts or denies your proposal;
+        }
+        {set;@{get;~user}propose;{get;~user};true}
+        {set;@{get;~user}proposed;{get;~user};true}
+        {set;@{userid}propose;{userid};true}
+        {set;@{userid}proposed;{userid};true}
+    ;
+
+    {embed;{embedbuild;
+        title:Marriage menu;
+        description:Please, if you see this text, use `b!t marry` instead{newline;2}You came here because you love somebody, right?
+        {newline}1. Accept (`{prefix}t marriage accept <user>`) - accept proposal.
+        {newline}2. Cancel (not working) - cancels your proposal sent before.
+        {newline}3. Divorce (not working) - divorce with user you are married.
+        {newline}4. Propose (`{prefix}t marriage propose <user>`) - Propose to a user.
+        {newline}5. Status (not working) - Displays your current status (Single/Proposed/Married);
+        color:{exec;randhex;api};
+        thumbnail.url:https://deculture101.files.wordpress.com/2010/08/wedding_deculture.jpg;
+    }}
+}

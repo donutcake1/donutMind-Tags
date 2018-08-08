@@ -1,0 +1,66 @@
+{//;    CuteHub by donutMind                    }
+{//;    Uses GNU GPLv3 License                  }
+{//;    Credits: byParallax for addind some code}
+
+{suppresslookup;true}
+{set;~args;{args;0}}
+{switch;{lower;{get;~args}};
+    image;
+        {embed;{embedbuild;
+            image.url:{exec;cute.image.data};
+            color:{randstr;abcdef12345689;6};
+        }}
+    ;
+
+    gif;
+        {embed;{embedbuild;
+            image.url:{exec;cute.gif.data};
+            color:{randstr;abcdef12345689;6};
+        }}
+    ;
+
+    submit;
+        {exec;cute.submit;{args}}
+    ;
+
+    api;
+        {exec;cute.api;{args}}
+    ;
+
+    random;
+        {embed;{embedbuild;
+            image.url:{randchoose;{exec;cute.gif.data};{exec;cute.image.data}};
+            color:{randstr;abcdef12345689;6};
+        }}
+    ;
+
+    credits;
+        {embed;{embedbuild;
+            title:Credits to all these wonderful people;
+            description:1. **RagingLonk#8970** for testing stuff.{newline}2. **byParallax#0440** for addind a `submit` subcommand{newline;2};
+            fields.name:Your name can also be here, just follow link below and contribute some code;
+            fields.value:https://github.com/donutcake1/blarg_tags;
+        }}
+    ;
+
+    
+    {embed;{embedbuild;
+        title:CuteHub;url:https://github.com/donutcake1/blarg_tags/tree/master/cute;
+        description:Usage: `{prefix}t cute args`.{newline}`args` is one of the command below (case-insensitive);
+        fields.name::frame_photo: Image;
+        fields.value:Sends cute image.;
+        fields.name::movie_camera: Gif;
+        fields.value:Sends cute gif image.;
+        fields.name: :game_die: Random;
+        fields.value:Gives bot right to choose.;
+        fields.name: :inbox_tray: Submit;
+        fields.value: Submit a cute gif or a cute image.;
+        fields.name: :desktop: API;
+        fields.value: Return a RAW output to integrate in your commands;
+        color:{randstr;abcdef12345689;6};
+        author.name:Created by donutMind 🍩;
+        footer.text:{username}, you are cute.;
+        timestamp:{time};
+        thumbnail.url:https://vignette.wikia.nocookie.net/les-simpson-springfield/images/4/43/Lot_de_60_donuts.png/revision/latest?cb=20150905210406&path-prefix=fr;
+    }}
+}

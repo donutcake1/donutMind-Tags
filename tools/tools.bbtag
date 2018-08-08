@@ -1,0 +1,78 @@
+{//;Tools - a bunch of different tools}
+
+{function;regexlist;
+    {embed;{embedbuild;
+        title:List of regex chars;
+        fields.name:Symbol match - range - a-z, 0-9, and special symbols;
+        fields.value:`\`;
+        fields.inline:true;
+        fields.name:Character match - range - a-z A-Z;
+        fields.value:`\w`;
+        fields.inline:true;
+        fields.name:Digit character match - range - 0-9;
+        fields.value:`\d`;
+        fields.inline:true;
+        fields.name:Non-digit character match;
+        fields.value:`\D`;
+        color:{exec;randhex;api};
+    }}
+}
+{function;regexflags;
+    {embed;{embedbuild;
+        title:Regex flags;
+        fields.name:Global (used by command by default);
+        fields.value:`\g`;
+        fields.name:Multi-line search (used by default, too);
+        fields.value:`\m`;
+        fields.name:Insensitive;
+        fields.value:`\i`;
+        color:{exec;randhex;api};
+    }}
+}
+
+{switch;{lower;{args;0}};
+    regexlist;
+        {func.regexlist}
+    ;
+    regexflags;
+        {func.regexflags}
+    ;
+    reset_var;
+        {if;{args;0};==;;Please, provide an existing variable!{return}}
+        {set;{args;1};0}
+        Success! Variable {args;1} has been reset!
+    ;
+
+    assign_var;
+        {if;{args;1};==;;Please, provide an existing variable!{return}}
+        {set;{args;1};{args;2}}
+    ;
+    match;
+        {if;{args;1};==;;Please, provide a text message to match regex!{return}}
+        {if;{args;2};==;;Please, provide a regex to match the text symbols!{return}}
+        {regexmatch;{args;1};{args;2}/gm}
+    ;
+    help;
+        {embed;{embedbuild;
+            title:Tools (alpha-0.0.1);
+            description:Common usage: `{prefix}t tools <command> <args1> <args2>`;
+            fields.name:Assign variable;
+            fields.value:Assigns some value to provided variable.{newline}Usage: `{prefix}t tools assign_var <variable> <value>`;
+            fields.inline:true;
+            fields.name:Regex match;
+            fields.value:Matches specified wordchar/digit/special_char in provided text.{newline}Usage: `{prefix}t tools match <text> <regex.>`;
+            fields.inline:true;
+            fields.name:Reset variable;
+            fields.value:Resets provided variable.{newline}Usage: `{prefix}t tools reset_var <variable> <value>`;
+            fields.inline:true;
+            fields.name:Regex info;
+            fields.value:Displays info about regex.{newline}Usage: `{prefix}t tools regexlist` {newline} `{prefix}t tools regexflags`;
+            color:{exec;randhex;api};
+        }}
+    ;
+    {embed;{embedbuild;
+        title:Exception;
+        description:Please do `{prefix}t tools help`.;
+        color:{exec;randhex;api};
+    }}
+}

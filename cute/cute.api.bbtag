@@ -1,0 +1,28 @@
+{//;Prevent users from running the command and redirect them to the "b!t cute" tag}
+    {if;!=;cute;{commandname};
+        {embed;
+            {embedbuild;
+                title:Something went wrong!;
+                color:EF576F;
+                description:You are not allowed to run this command, it is an external module from the CuteHub tag. Instead, you should consider running `b!t cute` or [browsing the code](https://github.com/donutcake1/blarg_tags/tree/master/cute).
+            }
+        }
+        {return} 
+    }
+
+{//;If the user doesn't provide an argument, return an error}
+    {if;==;1;{argslength};
+        `expected 'gif' or 'image' (got empty)`
+        {return}
+    }
+
+{//;Switch between GIF and IMAGE endpoints}
+    {switch;
+        {lower;{args;1}};
+            gif;
+                {exec;cute.gif.data};
+            image;
+                {exec;cute.image.data};
+            {//;error}
+                `expected 'gif' or 'image' (got invalid)`
+    }
