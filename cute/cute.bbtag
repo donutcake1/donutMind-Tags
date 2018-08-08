@@ -7,14 +7,14 @@
 {switch;{lower;{get;~args}};
     image;
         {embed;{embedbuild;
-            image.url:{exec;cute.image.data};
+            image.url:{randchoose;{get;@imgl}};
             color:{randstr;abcdef12345689;6};
         }}
     ;
 
     gif;
         {embed;{embedbuild;
-            image.url:{exec;cute.gif.data};
+            image.url:{randchoose;{get;@gifl}};
             color:{randstr;abcdef12345689;6};
         }}
     ;
@@ -29,9 +29,23 @@
 
     random;
         {embed;{embedbuild;
-            image.url:{randchoose;{exec;cute.gif.data};{exec;cute.image.data}};
+            image.url:{randchoose;{get;@gifl};{get;@imgl}};
             color:{randstr;abcdef12345689;6};
         }}
+    ;
+
+    push;
+        {if;!=;{userid};241612639560531968;Only tag creator can directly push links to DBs!{return}}
+        {if;==;false;{regextest;{args;1};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};Push push!;It seems like link is broken.{return}}
+        {switch;{lower;{args;1}};
+            img;
+                {push;{get;@imgl};{args;2}}
+            ;
+            gif;
+                {push;{get;@gifl;{args;2}}}
+            ;
+            No link was provided :(
+        }
     ;
 
     credits;
@@ -45,8 +59,8 @@
 
     
     {embed;{embedbuild;
-        title:CuteHub;url:https://github.com/donutcake1/blarg_tags/tree/master/cute;
-        description:Usage: `{prefix}t cute args`.{newline}`args` is one of the command below (case-insensitive);
+        title:CuteHub;url:https://github.com/BlargbotCustomTags/donutMind-Tags/tree/master/cute;
+        description:This tag uses private DB.{newline}Please start populating yours (Image and gif).{newline;2}Usage: `{prefix}t cute args`.{newline}`args` is one of the command below (case-insensitive);
         fields.name::frame_photo: Image;
         fields.value:Sends cute image.;
         fields.name::movie_camera: Gif;
