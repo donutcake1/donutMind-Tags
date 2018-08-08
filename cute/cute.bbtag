@@ -28,8 +28,10 @@
     ;
 
     random;
+        {//;Set the content type}
+        {set;rand;{randchoose;gif;img}}
         {embed;{embedbuild;
-            image.url:{randchoose;{get;@gifl};{get;@imgl}};
+            image.url:{randchoose;{get;@{get;rand}l}};
             color:{randstr;abcdef12345689;6};
         }}
     ;
