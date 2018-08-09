@@ -19,7 +19,7 @@
             footer.text:Alpha version, some things may be changed in 'release' version.;
         }}
     ;
-    
+
     ["adopt","get"];
         {if;{get;@{userid}_has_pupper};==;1;You need to release your current pup first!{return}}
         {embed;{embedbuild;
@@ -53,10 +53,10 @@
         {embed;{embedbuild;
             title:Your pupper.;
             fields.name:Pup name:;
-            fields.value:{get;@{get;~user}_pup_name};
+            fields.value:{get;@{userid;{args;1;n}}_pup_name};
             fields.inline:true;
             fields.name:Pup state;
-            fields.value:{if;{get;@{get;~user}_pup_clean};==;0;Needs cleaning;Clean!};
+            fields.value:{if;{get;@{userid;{args;1;n}}_pup_clean};==;0;Needs cleaning;Clean!};
             fields.inline:true;
             fields.name:Estimated feed time (hours);
             fields.value:{if;{get;@{userid}_feed_time};==;{time;HH};Your pup is hungry! Do `b!t pup feed` to feed pup.;{get;@{userid}_feed_time} hours.};
