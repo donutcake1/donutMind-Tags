@@ -1,82 +1,54 @@
-{//;Puppers. Everyone loves them!}
+{//;Puppy rewrite}
+{//;Should work 80%}
+
+{set;~c;{commandname}}
+{if;{iscc};!=;true;{set;~p;{prefix}t};{set;~p;{prefix}}}
 
 {suppresslookup;true}
 
 {switch;{lower;{args;0}};
-    ["help","menu"];
+    help;
         {embed;{embedbuild;
-            title:Pup's :b:orking :b:ook.;
+            title:Puppy handbook.;
+            description:Adopt a pup, then customize it as you want, or play with it! Also, don't forget to feed and rest!;
             fields.name:General;
-            fields.value:**1.** `b!t pup adopt` - Adopt pupper.{newline}**2.** `b!t pup release` - Release pup.{newline}**3.** `b!t pup view <user>` - View your pup or other user's pup.;
-            fields.name:Care;
-            fields.value:**1.** `b!t pup feed` - Feed pup (once per 4 hours).{newline}**2.** `b!t pup clean` - Clean pup.{newline}**3.** `b!t pup rest` - Let pup sleep.{newline}**4.** `b!t pup awake` - Wake up!;
+            fields.value:`{get;~p} {get;~c} adopt` - Adopt a puppy!{newline}`{get;~p} {get;~c} release` - Release puppy (don't do this :sad:){newline}`{get;~p} {get;~c}` - View info about your pup.{newline;2};
+            fields.name:Day-to-day routine;
+            fields.value:`{get;~p} {get;~c} wash` - Clean your pet.{newline}`{get;~p} {get;~c} feed` - Feed your pet.{newline} Recommended once per 4 hours.{newline}`{get;~p} {get;~c} rest` - Let pup rest.{newline}Recommended every 12-16 hours.{newline;2};
             fields.name:Fun;
-            fields.value:**1.** `b!t pup play` - Play with pup.{newline}**2.** `b!t pup pat` - Slightly pat your pup.;
-            fields.name:Customization;
-            fields.value: placeholder text;
-            color:b5abf5;
-            thumbnail.url:https://cdn.shopify.com/s/files/1/0284/2450/products/labrador_pup_decor_2_2048x@2x.JPG;
-            footer.text:Alpha version, some things may be changed in 'release' version.;
+            fields.value:`{get;~p} {get;~c} play` - Play with pup!{newline}`{get;~p} {get;~c} pet` - Pet your pup. 100% deserved!{newline}`{get;~p} {get;~c} walk` - Go on a walk with your pup.{newline;2};
+            fields.name:Customize;
+            fields.value:placeholder text;
+            thumbnail.url:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSivo8_jDNCDsU_1L7KW6wzZrk0jX8HRDbxWl7hCEd3KqhwEjXBOw;
+            color:{exec;randhex;api;pale};
         }}
     ;
-
-    ["adopt","get"];
-        {if;{get;@{userid}_has_pupper};==;1;You need to release your current pup first!{return}}
+    adopt;
+        {//;Check if user already has puppy}
+        {if;{get;@{userid}_has_pup};==;1;{exec;exception;TOO_MUCH_PUPPIES}{return}}
         {embed;{embedbuild;
-            title:You can't keep your tears!;
-            description:You adore your new pet! It's your very own pup, can you imagine?{newline}As it grows, you need to clean, feed and play with your pup.;
-            thumbnail.url:https://cdn.shopify.com/s/files/1/0284/2450/products/labrador_pup_decor_2_2048x@2x.JPG;
-            color:b5abf5;
+            title:Look at this cute boy!;
+            description:You now have this little puppy. Don't forget to feed it regularly!;
+            thumbnail.url:https://brightcove04pmdo-a.akamaihd.net/4221396001/4221396001_5209480649001_5209479447001-vs.jpg;
+            color:f0b4ec;
         }}
-        {set;@{userid}_has_pupper;1}
-        {set;@{userid}_pup_name;Pupper}
-        {set;@{userid}_pup_avatar;https://cdn.shopify.com/s/files/1/0284/2450/products/labrador_pup_decor_2_2048x@2x.JPG}
-        {set;@{userid}_pup_clean;1}
+    {set;@{userid}_has_pup;1}
+    {set;@{userid}_pupname;Puppy}
+    {set;@{userid}_pupavatar;https://brightcove04pmdo-a.akamaihd.net/4221396001/4221396001_5209480649001_5209479447001-vs.jpg}
+    {set;@{userid}_isHungry;0}
     ;
-
-    ["release","free"];
-        {if;{get;@{userid}_has_pupper;==;0;You don't have pupper! Please do `b!t pup adopt` to adopt one!{return}}}
+    release;
         {embed;{embedbuild;
-            title:Goodbye... you always will be good boy! :sob:;
-            description:How dare are you to release this good boy!;
-            color:ff0000;
+            title:Oh no!;
+            description:What you have done! You an awful person!;
+            color:Red;
         }}
-        {set;@{userid}_has_pupper;0}
-        {set;@{userid}_pup_name;No pup.}
-        {set;@{userid}_pup_avatar;https://imgur.com/a/i19Ql8m}
-        {set;@{userid}_pup_clean;0}
+        {set;@{userid}_has_pup;0}
     ;
-
-    view;
-        {if;{args;1;n};==;;{set;~user;{userid;{args;1;n}};{set;~user;{userid}}}}
-        {if;{get;@{userid;{args;1;n}}_has_pupper};==;false;This user hasn't own pup. Contact this user and ask to get one!}
-        {embed;{embedbuild;
-            title:Your pupper.;
-            fields.name:Pup name:;
-            fields.value:{get;@{userid;{args;1;n}}_pup_name};
-            fields.inline:true;
-            fields.name:Pup state;
-            fields.value:{if;{get;@{userid;{args;1;n}}_pup_clean};==;0;Needs cleaning;Clean!};
-            fields.inline:true;
-            fields.name:Estimated feed time (hours);
-            fields.value:{if;{get;@{userid}_feed_time};==;{time;HH};Your pup is hungry! Do `b!t pup feed` to feed pup.;{get;@{userid}_feed_time} hours.};
-            color:b5abf5;
-        }}
-    ;
-
     feed;
-        {//;if;@{userid}_feed_time;<=;{time;HH};{set;{userid}_ppoints_multiplier;2}}
-        {embed;{embedbuild;
-            title:Feed;
-            description:As you feed your pup, you see it slowly grows up!;
-            color:b5abf5;
-        }}
-        {set;@{userid}_feed_time;{math;+;0{get;@{userid}_feed_time};6}}
+        {if;{get;@{userid}_feedtime;==;{time;HH};{set;@{userid}_pup_isHungry;1}{return}}}
+        {if;{get;@{userid}_pup_isHungry};==;0;Your puppy is not hungry now. Estimated time to feed: {get;@{userid}_feedtime} hours.;Your puppy wants to eat!}
+        {set;@{userid}_feedtime;{math;+;{time;HH};6}}{set;@{userid}_pup_isHungry;0}
     ;
-
-    {embed;{embedbuild;
-        title:Error;
-        description:Please do `b!t pup help` to see help.;
-        color:ff0000;
-    }}
+    {exec;exception;UNHANDLED_EXCEPTION}
 }

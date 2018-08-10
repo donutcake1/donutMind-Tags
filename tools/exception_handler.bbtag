@@ -1,0 +1,13 @@
+{//;Get error code from args}
+{set;~ERR;{args}}
+{//;Check if it is called from command or a tag}
+{if;{iscc;{commandname}};==;true;{set;~help;`{prefix}{commandname} help`};{set;~help;`{prefix}t {commandname} help`}}
+{//;Display error code and command help in an embed}
+{embed;{embedbuild;
+    title:Exception;
+    description:Error code: {get;~ERR}.{newline}For help message, do `{get;~help}`.;
+    color:red;
+    thumbnail.url:https://lwuserimages.s3.amazonaws.com/iconwarning_55e407df07d7e.png;
+    footer.text:Error in command: {commandname};
+    timestamp:{time};
+}}
