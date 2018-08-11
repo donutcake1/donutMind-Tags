@@ -1,13 +1,24 @@
-{//;Get error code from args}
-{set;~ERR;{args}}
-{//;Check if it is called from command or a tag}
-{if;{iscc;{commandname}};==;true;{set;~help;`{prefix}{commandname} help`};{set;~help;`{prefix}t {commandname} help`}}
-{//;Display error code and command help in an embed}
+{suppresslookup;true}
+{//;Used to display help for command the tag is called from}
+{if;{iscc};==;true;{set;~cmd;`{prefix}{commandname} help`};{set;~cmd;`{prefix}t {commandname} help`}}
+{//;Get error code}
+{set;~err;{args;0}}
+{//;Get error level}
+{set;~lvl;{args;1}}
+{if;{argslength};>;2;{set;~info;{args;2;n}};{set;~info;No additional info was provided.}}
+{//;If no args provided, then error = UNHANDLED_EXCEPTION, level = CRIT}
+{if;{argslength};==;0;{set;~err;UNHANDLED_EXCEPTION}{set;~lvl;CRIT}}
+{//;Set icon according to error level, default - critical}
+{switch;{lower;{args;1}};
+    info;{set;~url;https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Info_icon-72a7cf.svg/2000px-Info_icon-72a7cf.svg.png};
+    warn;{set;~url;https://www.materialui.co/materialIcons/alert/warning_amber_384x384.png};
+    crit;{set;~url;https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/alert-circle-red-512.png};
+    {set;~url;https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/alert-circle-red-512.png}
+}
+{//;Display embed containing: error code, error level, info}
 {embed;{embedbuild;
     title:Exception;
-    description:Error code: {get;~ERR}.{newline}For help message, do `{get;~help}`.;
+    description:Details: {newline}Error code: {upper;{get;~err}}{newline}Error level: {get;~lvl}{newline}Additional details: {get;~info};
+    thumbnail.url:{get;~url};
     color:red;
-    thumbnail.url:https://lwuserimages.s3.amazonaws.com/iconwarning_55e407df07d7e.png;
-    footer.text:Error in command: {commandname};
-    timestamp:{time};
 }}
