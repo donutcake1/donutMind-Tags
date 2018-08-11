@@ -3,56 +3,77 @@
 {//;    Credits: byParallax for addind some code}
 
 {suppresslookup;true}
-{set;~args;{args;0}}
-{switch;{lower;{get;~args}};
-    image;
-        {embed;{embedbuild;
-            image.url:{randchoose;{get;@imgl}};
-            color:{randstr;abcdef12345689;6};
-        }}
-    ;
-
-    gif;
-        {embed;{embedbuild;
-            image.url:{randchoose;{get;@gifl}};
-            color:{randstr;abcdef12345689;6};
-        }}
-    ;
-
-    submit;
-        {exec;cute.submit;{args}}
-    ;
-
-    api;
-        {exec;cute.api;{args}}
-    ;
-
-    random;
-        {//;Set the content type}
-        {set;rand;{randchoose;gif;img}}
-        {embed;{embedbuild;
-            image.url:{randchoose;{get;@{get;rand}l}};
-            color:{randstr;abcdef12345689;6};
-        }}
-    ;
-
-    push;
-        {if;!=;{userid};241612639560531968;Only tag creator can directly push links to DBs!{return}}
-        {if;==;false;{regextest;{args;1};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};Push push!;It seems like link is broken.{return}}
-        {switch;{lower;{args;1}};
-            img;
-                {push;{get;@imgl};{args;2}}
-            ;
-            gif;
-                {push;{get;@gifl;{args;2}}}
-            ;
-            No link was provided :(
-        }
-    ;
-
-    credits;
-        {embed;{embedbuild;
-            title:Credits to all these wonderful people;
+{switch;{lower;{args;0}};
+  image;
+    {embed;{embedbuild;
+      image.url:{randchoose;{get;@imgl}};
+      color:{randstr;abcdef12345689;6};
+    }}
+  ;
+  gif;
+    {embed;{embedbuild;
+      image.url:{randchoose;{get;@gifl}};
+      color:{randstr;abcdef12345689;6};
+    }}
+  ;
+  submit;
+    {exec;cute.submit;{args}}
+  ;
+  api;
+    {exec;cute.api;{args}}
+  ;
+  random;
+    {//;Set the content type}
+    {set;rand;{randchoose;gif;img}}
+    {embed;{embedbuild;
+      image.url:{randchoose;{get;@{get;rand}l}};
+      color:{randstr;abcdef12345689;6};
+    }}
+  ;
+  push;
+    {//;Nobody can push the links to the database, only Donut can}
+    {if;!=;{userid};241612639560531968;Only tag creator can directly push links to DBs!{return}}
+    {if;==;true;{regextest;{args;2};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};Push push!;It seems like link is broken.{return}}
+    {switch;{lower;{args;1}};
+      img;
+        {//;Assign a link to image database}
+        {push;{get;@imgl};{args;2}}
+      ;
+      gif;
+      {//;Assign a link to GIF database}
+      {push;{get;@gifl};{args;2}}
+      ;
+      {//;Fired when no input}
+      No link was provided :(
+    }
+  ;
+  delete;
+    {//;Ping me if you want this feature - delete multiple links}
+    {//;set;~link;{args;2;n}}
+    {//;Nobody can push the links to the database, only Donut can}
+    {if;!=;{userid};241612639560531968;Only tag creator can delete links from the DBs!{return}}
+    {if;==;true;{regextest;{args;2};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};:ok_hand:;It seems like link is broken.{return}}
+    {//;Just in case things go wrong ._.}
+    {set;@{userid}_db_img_backup;{get;@imgl}}
+    {set;@{userid}_db_gif_backup;{get;@gifl}}
+    {void;{switch;{lower;{args;1}};
+      img;
+        {//;Get image link position in array and delete it}
+        {set;~index;{indexof;{get;@imgl};{args;2}}}
+        {if;{get;~index};!=;-1;{splice;{get;@imgl};{get;~index};1}}
+      ;
+      gif;
+        {//;Get image link position in array and delete it}
+        {set;~index;{indexof;{get;@gifl};{args;2}}}
+        {if;{get;~index};!=;-1;{splice;{get;@gifl};{get;~index};1}}
+      ;
+      {//;Fired when no input}
+      No link was provided :(
+    }}
+  ;
+  credits;
+    {embed;{embedbuild;
+        title:Credits to all these wonderful people;
             description:1. **RagingLonk#8970** for testing stuff.{newline}2. **byParallax#0440** for addind a `submit` subcommand{newline;2};
             fields.name:Your name can also be here, just follow link below and contribute some code;
             fields.value:https://github.com/donutcake1/blarg_tags;
