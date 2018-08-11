@@ -43,6 +43,8 @@ Thanks! Your submission will be reviewed shortly, and we will make sure to infor
     New submission for **`CuteHub`** from {username}#{userdiscrim} ({userid}){newline;2}Link: {args;1};
     {embedbuild;
         title:Preview of the {if;{args;1};endswith;gif;GIF;Image};
+        fields.name:Review rules!;
+        fields.value:1. Check the link by opening it in browser.{newline}2. If previous step OK, then do `b!t submit_test <link>`.3. Push link to the proper DB according to its extension (jp(e)g/png for img, gif for GIF);
         color:{exec;randhex;api};
         image.url:{args;1};
     }
