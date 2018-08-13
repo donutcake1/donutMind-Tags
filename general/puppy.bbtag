@@ -1,54 +1,80 @@
-{//;Puppy rewrite}
-{//;Should work 80%}
+{//;Version constants to generate version}
+{set;~VERSION_NUMBER;0.1}
+{set;~VERSION_CODE;alpha}
 
-{set;~c;{commandname}}
-{if;{iscc};!=;true;{set;~p;{prefix}t};{set;~p;{prefix}}}
+{//;Embed with error}
+{func;throw.err;
+    {void;
+        {throw;
+            {embed;
+                {embedbuild;
+                    title:Oops!;
+                    description:You either provided a wrong subcommand or didn't provide one.{newline}Please run `b!t {commandname} help` to display all available subcommands!;
+                    color:Red;
+                }
+            }
+        }
+    }
+}
 
-{suppresslookup;true}
+{//;Get subcommand}
+{set;~subcommand;{args;0}}
 
-{switch;{lower;{args;0}};
-    help;
-        {embed;{embedbuild;
-            title:Puppy handbook.;
-            description:Adopt a pup, then customize it as you want, or play with it! Also, don't forget to feed and rest!;
-            fields.name:General;
-            fields.value:`{get;~p} {get;~c} adopt` - Adopt a puppy!{newline}`{get;~p} {get;~c} release` - Release puppy (don't do this :sad:){newline}`{get;~p} {get;~c}` - View info about your pup.{newline;2};
-            fields.name:Day-to-day routine;
-            fields.value:`{get;~p} {get;~c} wash` - Clean your pet.{newline}`{get;~p} {get;~c} feed` - Feed your pet.{newline} Recommended once per 4 hours.{newline}`{get;~p} {get;~c} rest` - Let pup rest.{newline}Recommended every 12-16 hours.{newline;2};
-            fields.name:Fun;
-            fields.value:`{get;~p} {get;~c} play` - Play with pup!{newline}`{get;~p} {get;~c} pet` - Pet your pup. 100% deserved!{newline}`{get;~p} {get;~c} walk` - Go on a walk with your pup.{newline;2};
-            fields.name:Customize;
-            fields.value:placeholder text;
-            thumbnail.url:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSivo8_jDNCDsU_1L7KW6wzZrk0jX8HRDbxWl7hCEd3KqhwEjXBOw;
-            color:{exec;randhex;api;pale};
-        }}
+{//;Provide options based on subcommand input}
+
+{switch;{lower;{get;~subcommand}};
+    ["help","menu"];
+        {embed;
+            {embedbuild;
+                title:Puppies!;
+                fields.name:General subcommands.;
+                fields.value:Adopt - adopt your puppy.{newline}Release - release your puppy.{newline}.{newline}View <user> - view your puppy or pup of specified user.{newline}Shop - buy some stuff for puppy.;
+                fields.name:Care subcommands.;
+                fields.value:Rest - Let your pup rest for some time.{newline}Feed - feed your puppy.{newline}Play - play with your puppy.{newline}Pet - pet your puppy.;
+                color:white;
+                footer.text:Build {get;~VERSION_NUMBER}-{get;~VERSION_CODE};
+                timestamp:{time};
+            }
+        }
     ;
     adopt;
-        {//;Check if user already has puppy}
-        {if;{get;@{userid}_has_pup};==;1;{exec;exception;TOO_MUCH_PUPPIES}{return}}
-        {embed;{embedbuild;
-            title:Look at this cute boy!;
-            description:You now have this little puppy. Don't forget to feed it regularly!;
-            thumbnail.url:https://brightcove04pmdo-a.akamaihd.net/4221396001/4221396001_5209480649001_5209479447001-vs.jpg;
-            color:f0b4ec;
-        }}
-    {set;@{userid}_has_pup;1}
-    {set;@{userid}_pupname;Puppy}
-    {set;@{userid}_pupavatar;https://brightcove04pmdo-a.akamaihd.net/4221396001/4221396001_5209480649001_5209479447001-vs.jpg}
-    {set;@{userid}_isHungry;0}
+        {if;{get;@{userid}_own};==;true;You can't own more than one puppy!{return}}
+        {embed;
+            {embedbuild;
+                title:Yay!;
+                description:You now have your own pup!{newline}Don't forget about it, or you might lose this one!;
+                color:white;
+                footer.icon_url:{useravatar};
+                footer.text:{username};
+                timestamp:{time};
+            }
+        }
+        {set;@{userid}_own;true}
+        {set;@{userid}_name;Puppy}
+        {set;@{userid}_avatar;https://static1.squarespace.com/static/5819bb2920099e33f325a498/t/584776b9725e25ae983d104b/1481078465774/golden-retriever-dog-puppy-running-towards-camera.jpg}
     ;
     release;
-        {embed;{embedbuild;
-            title:Oh no!;
-            description:What you have done! You an awful person!;
-            color:Red;
-        }}
-        {set;@{userid}_has_pup;0}
+    {set;@{userid}_own;false}
+    {set;@{userid}_name;No pup.}
+    {set;@{userid}_avatar;[""]}
+    {embed;
+        {embedbuild;
+            title:Released.;
+            description:That's so sad...;
+            color:black;
+        }
+    }
     ;
-    feed;
-        {if;{get;@{userid}_feedtime;==;{time;HH};{set;@{userid}_pup_isHungry;1}{return}}}
-        {if;{get;@{userid}_pup_isHungry};==;0;Your puppy is not hungry now. Estimated time to feed: {get;@{userid}_feedtime} hours.;Your puppy wants to eat!}
-        {set;@{userid}_feedtime;{math;+;{time;HH};6}}{set;@{userid}_pup_isHungry;0}
+    view;
+    {embed;
+        {embedbuild;
+            title:Your pup, {username}!;
+            fields.name:Stats;
+            fields.value:Name: {get;@{userid}_name};
+            thumbnail.url:{get;@{userid}_avatar};
+            color:white;
+        }
+    }
     ;
-    {exec;exception;UNHANDLED_EXCEPTION}
+    {func.throw.err}
 }
