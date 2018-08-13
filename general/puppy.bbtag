@@ -2,14 +2,37 @@
 {set;~VERSION_NUMBER;0.1}
 {set;~VERSION_CODE;alpha}
 
+{//;Suppress output}
+{suppresslookup;true}
+
+{//;Display user-friendly time [day month, year]}
+{void;
+    {func;timeFormat;
+        {switch;{lower;{time;MM}};
+            01;{set;@pup{userid}atime;{time;DD}, January, {time;YYYY}};
+            02;{set;@pup{userid}atime;{time;DD}, February, {time;YYYY}};
+            03;{set;@pup{userid}atime;{time;DD}, March, {time;YYYY}};
+            04;{set;@pup{userid}atime;{time;DD}, April, {time;YYYY}};
+            05;{set;@pup{userid}atime;{time;DD}, May, {time;YYYY}};
+            06;{set;@pup{userid}atime;{time;DD}, June, {time;YYYY}};
+            07;{set;@pup{userid}atime;{time;DD}, July, {time;YYYY}};
+            08;{set;@pup{userid}atime;{time;DD}, August, {time;YYYY}};
+            09;{set;@pup{userid}atime;{time;DD}, September, {time;YYYY}};
+            10;{set;@pup{userid}atime;{time;DD}, October, {time;YYYY}};
+            11;{set;@pup{userid}atime;{time;DD}, November, {time;YYYY}};
+            12;{set;@pup{userid}atime;{time;DD}, December, {time;YYYY}};
+            {func.throw_err;Incorrect time input!}
+        }
+    }
+}
 {//;Embed with error}
-{func;throw.err;
+{func;throw_err;
     {void;
         {throw;
             {embed;
                 {embedbuild;
                     title:Oops!;
-                    description:You either provided a wrong subcommand or didn't provide one.{newline}Please run `b!t {commandname} help` to display all available subcommands!;
+                    description:{params}{newline}Please run `b!t {commandname} help` to display all available subcommands!;
                     color:Red;
                 }
             }
@@ -28,17 +51,23 @@
             {embedbuild;
                 title:Puppies!;
                 fields.name:General subcommands.;
-                fields.value:Adopt - adopt your puppy.{newline}Release - release your puppy.{newline}.{newline}View <user> - view your puppy or pup of specified user.{newline}Shop - buy some stuff for puppy.;
+                fields.value:Adopt - adopt your puppy.{newline}Release - release your puppy.{newline}View `<user>` - view your puppy or pup of specified user.{newline}Shop - buy some stuff for puppy.;
+                fields.inline:true;
                 fields.name:Care subcommands.;
                 fields.value:Rest - Let your pup rest for some time.{newline}Feed - feed your puppy.{newline}Play - play with your puppy.{newline}Pet - pet your puppy.;
+                fields.inline:true;
+                fields.name:Customization;
+                fields.value:Name - give your pup new name.{newline}Avatar - give your pup a new look.;
                 color:white;
                 footer.text:Build {get;~VERSION_NUMBER}-{get;~VERSION_CODE};
+                footer.icon_url:{useravatar};
+                thumbnail.url:https://static1.squarespace.com/static/5819bb2920099e33f325a498/t/584776b9725e25ae983d104b/1481078465774/golden-retriever-dog-puppy-running-towards-camera.jpg;
                 timestamp:{time};
             }
         }
     ;
     adopt;
-        {if;{get;@{userid}_own};==;true;You can't own more than one puppy!{return}}
+        {if;{get;@pup{userid}own};==;true;{func.throw_err;❌You can't own more than one puppy!{return}}}
         {embed;
             {embedbuild;
                 title:Yay!;
@@ -49,14 +78,21 @@
                 timestamp:{time};
             }
         }
-        {set;@{userid}_own;true}
-        {set;@{userid}_name;Puppy}
-        {set;@{userid}_avatar;https://static1.squarespace.com/static/5819bb2920099e33f325a498/t/584776b9725e25ae983d104b/1481078465774/golden-retriever-dog-puppy-running-towards-camera.jpg}
+        {set;@pup{userid}own;true}
+        {set;@pup{userid}name;Puppy}
+        {set;@pup{userid}avatar;https://static1.squarespace.com/static/5819bb2920099e33f325a498/t/584776b9725e25ae983d104b/1481078465774/golden-retriever-dog-puppy-running-towards-camera.jpg}
+        {set;@pup{userid}atime;["{time;DD}","{time;MM}","{time;YYYY}"]}
+        {set;@pup{userid}feeds_doggo;20}
+        {set;@pup{userid}feeds_rel;100}
+        {set;@pup{userid}type;pup}
+        {func.timeFormat}
     ;
     release;
-    {set;@{userid}_own;false}
-    {set;@{userid}_name;No pup.}
-    {set;@{userid}_avatar;[""]}
+    {if;{get;@pup{userid}own};==;false;{func.throw_err;You can't release air!}{return}}
+    {if;{get;@pup{userid}type};==;Your old friend;You can't release your friend.{return}}
+    {set;@pup{userid}own;false}
+    {set;@pup{userid}name;No pup.}
+    {set;@pup{userid}avatar;[""]}
     {embed;
         {embedbuild;
             title:Released.;
@@ -66,15 +102,31 @@
     }
     ;
     view;
+    {set;~view_user;{userid;{args;1}}}
+    {if;{get;~view_user};==;{userid};{set;~view_user;{userid};{set;~view_user;{userid;{args;1}}}}}
+    {if;@pup{get;~view_user}own;==;false;{func.throw_err;This user hasn't adopted their puppy yet.}{return}}
     {embed;
         {embedbuild;
-            title:Your pup, {username}!;
+            title:Your pup, {username;{get;~view_user}}!;
             fields.name:Stats;
-            fields.value:Name: {get;@{userid}_name};
-            thumbnail.url:{get;@{userid}_avatar};
+            fields.value:Name: {get;@pup{get;~view_user}name}{newline}Adopt date: {get;@pup{get;~view_user}atime}{newline}Type: {get;@pup{get;~view_user}type}.;
+            thumbnail.url:{get;@pup{get;~view_user}avatar};
             color:white;
         }
     }
     ;
-    {func.throw.err}
+    ["rest","sleep"];
+        {if;@pup{userid}lastRestTime;<=;{time;HH};{func.throw_err;Your pup doesn't needs to sleep now.}{return}}
+        Your pup lies on your knees and start sneezing. Don't move!
+    ;
+    feed;
+        {if;@pup{userid}isHungry;==;0;{func.throw_err;Your pup isn't hungry right now!}{return}}
+        {set;@pup{userid}isHungry;0}
+        {set;@pup{userid}feeds;{math;-;0{get;@pup{userid}feeds};1}}
+        Your puppy grows over time as you feed it. It will grow soon.
+        {if;{get;@pup{userid}feeds;==;20;{set;@pup{userid}type;doggo}}}
+        {if;{get;@pup{userid}feeds;==;100;{set;@pup{userid}type;Your old friend.}}};
+    name;{set;@pup{userid}name;{args;1}}Your pup's new name is {args;1}!;
+    avatar;{set;@pup{userid}avatar;{args;1}};
+    {func.throw_err;You either provide a non-existing subcommand or it tag-side issue...}
 }
