@@ -1,6 +1,6 @@
 {//;Version constants to generate version}
-{set;~VERSION_NUMBER;0.1}
-{set;~VERSION_CODE;alpha}
+{set;~VERSION_NUMBER;0.6}
+{set;~VERSION_CODE;PTR}
 
 {//;Suppress output}
 {suppresslookup;true}
@@ -32,7 +32,7 @@
             {embed;
                 {embedbuild;
                     title:Oops!;
-                    description:{params}{newline}Please run `b!t {commandname} help` to display all available subcommands!;
+                    description:{params};
                     color:Red;
                 }
             }
@@ -40,6 +40,19 @@
     }
 }
 
+{function;pup_view;
+    {if;@pup{get;~view_user}own;==;false;{func.throw_err;This user hasn't adopted their puppy yet.}{return}}
+    {if;{userid;{args}};==;{userid};{set;~view_user;{userid}};{set;~view_user;{userid;{args}}}}
+    {embed;
+        {embedbuild;
+            title:Your pup, {username;{get;~view_user}}!;
+            fields.name:Stats;
+            fields.value:Name: {get;@pup{get;~view_user}name}{newline}Adopt date: {get;@pup{get;~view_user}atime}{newline}Type: {get;@pup{get;~view_user}type}.;
+            thumbnail.url:{get;@pup{get;~view_user}avatar};
+            color:white;
+        }
+    }
+}
 {//;Get subcommand}
 {set;~subcommand;{args;0}}
 
@@ -102,9 +115,8 @@
     }
     ;
     view;
-    {set;~view_user;{userid;{args;1}}}
-    {if;{get;~view_user};==;{userid};{set;~view_user;{userid};{set;~view_user;{userid;{args;1}}}}}
     {if;@pup{get;~view_user}own;==;false;{func.throw_err;This user hasn't adopted their puppy yet.}{return}}
+    {if;{userid;{args;1}};==;{userid};{set;~view_user;{userid}};{set;~view_user;{userid;{args;1}}}}
     {embed;
         {embedbuild;
             title:Your pup, {username;{get;~view_user}}!;
@@ -118,6 +130,7 @@
     ["rest","sleep"];
         {if;@pup{userid}lastRestTime;<=;{time;HH};{func.throw_err;Your pup doesn't needs to sleep now.}{return}}
         Your pup lies on your knees and start sneezing. Don't move!
+        {set;@pup{userid}balance;{math;+;0{get;@pup{userid}balance};10}}
     ;
     feed;
         {if;@pup{userid}isHungry;==;0;{func.throw_err;Your pup isn't hungry right now!}{return}}
@@ -125,8 +138,43 @@
         {set;@pup{userid}feeds;{math;-;0{get;@pup{userid}feeds};1}}
         Your puppy grows over time as you feed it. It will grow soon.
         {if;{get;@pup{userid}feeds;==;20;{set;@pup{userid}type;doggo}}}
-        {if;{get;@pup{userid}feeds;==;100;{set;@pup{userid}type;Your old friend.}}};
+        {if;{get;@pup{userid}feeds;==;100;{set;@pup{userid}type;Your old friend.}}}
+    ;
+    pet;
+    {embed;{embedbuild;description:Such a good boy!;image.url:https://www.pets4homes.co.uk/images/articles/4367/large/what-does-it-mean-if-your-dog-growls-when-you-pat-them-59ba421e0884c.jpg}};
+    play;{randchoose;@pup_play_word}{set;@pup{userid}balance;{math;+;0{get;@pup{userid}balance};{randint;1;15}}}
+    ;
     name;{set;@pup{userid}name;{args;1}}Your pup's new name is {args;1}!;
-    avatar;{set;@pup{userid}avatar;{args;1}};
-    {func.throw_err;You either provide a non-existing subcommand or it tag-side issue...}
+    shop;
+    {//;Display all items in shop, 10 positions per category}
+    {embed;{embedbuild;
+        title:Shop.;
+        description:To buy some items from the shop, you need to type full name of the item.;
+        fields.name:Food;
+        fields.value:{foreach;~item;{get;@pup_shop_food};{get;~item}{newline}};
+        fields.name:Play items;
+        fields.value:{foreach;~item;{get;@pup_shop_play};{get;~item}{newline}};
+        fields.name:Miscellaneous items;
+        fields.value:Under construction;
+        color:white;
+        footer.text:Your balance: {get;@pup{userid}balance} coins.;
+    }}
+    {if;{args;1;n};==;;Item not selected!{return}}
+    {switch;{lower;{args;1}};
+        food;
+            {if;{args;2;n};==;{indexof;{args;1;n};{get;@pup_shop_food}};Item doesn't exist!{return};{set;~buy;{get;@pup_shop_food;{indexof;{args;1;n};{get;@pup_shop_food}}}}}
+            {set;~cost;{regexmatch;{get;~buy};\d+/gmi}}
+            {if;{get;@pup{userid}balance};<;{get;~cost};Insufficient coins!{return};The item was bought and {get;~cost} coins were withdrawn from your account.}
+            {set;@pup{userid}balance;{math;-;0{get;@pup{userid}balance};{get;~cost}}}
+        ;
+        play;
+            {if;{args;2;n};==;{indexof;{args;1;n};{get;@pup_shop_play}};Item doesn't exist!{return};{set;~buy;{get;@pup_shop_play;{indexof;{args;1;n};{get;@pup_shop_play}}}}}
+            {set;~cost;{regexmatch;{get;~buy};\d+/gmi}}
+            {if;{get;@pup{userid}balance};<;{get;~cost};Insufficient coins!{return};The item was bought and {get;~cost} coins were withdrawn from your account.}
+            {set;@pup{userid}balance;{math;-;0{get;@pup{userid}balance};{get;~cost}}}
+        ;
+    }
+    ;
+    ["avatar","look"];{set;@pup{userid}avatar;{args;1}};
+    {func.pup_view;{args;0;n}}
 }
