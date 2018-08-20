@@ -1,180 +1,120 @@
-{//;Version constants to generate version}
-{set;~VERSION_NUMBER;0.6}
-{set;~VERSION_CODE;PTR}
-
-{//;Suppress output}
 {suppresslookup;true}
-
-{//;Display user-friendly time [day month, year]}
-{void;
-    {func;timeFormat;
-        {switch;{lower;{time;MM}};
-            01;{set;@pup{userid}atime;{time;DD}, January, {time;YYYY}};
-            02;{set;@pup{userid}atime;{time;DD}, February, {time;YYYY}};
-            03;{set;@pup{userid}atime;{time;DD}, March, {time;YYYY}};
-            04;{set;@pup{userid}atime;{time;DD}, April, {time;YYYY}};
-            05;{set;@pup{userid}atime;{time;DD}, May, {time;YYYY}};
-            06;{set;@pup{userid}atime;{time;DD}, June, {time;YYYY}};
-            07;{set;@pup{userid}atime;{time;DD}, July, {time;YYYY}};
-            08;{set;@pup{userid}atime;{time;DD}, August, {time;YYYY}};
-            09;{set;@pup{userid}atime;{time;DD}, September, {time;YYYY}};
-            10;{set;@pup{userid}atime;{time;DD}, October, {time;YYYY}};
-            11;{set;@pup{userid}atime;{time;DD}, November, {time;YYYY}};
-            12;{set;@pup{userid}atime;{time;DD}, December, {time;YYYY}};
-            {func.throw_err;Incorrect time input!}
-        }
-    }
+{fallback;Oops, something went wrong. Send {usermention;241612639560531968} a message to notify!}
+{//;Set prefix+iscc+commandame to shorten embed description}
+{if;{iscc};==;false;{set;~cmd;{prefix}t {commandname}};{set;~cmd;{prefix}{commandname}}}
+{//;View user's puppy}
+{function;view;
+    {//;Check if user is matching conditions above}
+    {//;If user is not specified then user is executor}
+    {if;{argslength};>=;2;{set;~user;{userid;{args;1;n}}};{set;~user;{userid}}}
+    {//;If user hasn't puppy, then can't display}
+    {if;{get;@pup{get;~user}own};!=;true;This user released pup and/or not adopted one yet!{newline}Do `{get;~cmd} adopt` to get started!{return}}
+    {embed;{embedbuild;
+        title:Here's your pup, {username;{get;~user}}!;
+        description: __**Stats**__:{newline}Name: {get;@pup{get;~user}name}{newline}Adopt date: {get;@pup{get;~user}adate}{newline}Clean: {if;{get;@pup{get;~user}clean};==;true;yes.;no, do `{get;~cmd} clean`, please!};
+        image.url: {get;@pup{get;~user}avatar};
+        color:white;
+    }}
 }
-{//;Embed with error}
-{func;throw_err;
-    {void;
-        {throw;
+{function;valid_image;
+{if;{logic;!;{regextest;{args;1};/^[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/}};false{return}}
+{set;~r;{logic;!;{regextest;{messageembeds;{get;~msgid}};/^\[\{"fields":\[\{"inline":false,"name":"Malformed JSON","value":"`Invalid embed: Invalid image\.url`"\}\],"type":"rich"\}\]$|"image":\{"url":".+?","width":(?:0,"proxy_url":".+?","height":0|1200,"proxy_url":".+?","height":630)\}/}}}
+{//;edit;{get;~msgid};{if;{argslength};==;1;{get;~r};{if;{get;~r};{args;1};{args;2}}};_delete}
+}
+{//;Help message}
+{function;help;
+    {embed;{embedbuild;
+            title:List of {commandname} subcommands;
+            description:__General-and-Customize__:{newline}{get;~cmd} Adopt - adopt puppy.{newline}{get;~cmd} Release - release puppy.{newline}{get;~cmd} view <user> - view puppies of other users (if they have one).{newline}{get;~cmd} Name - give your puppy a new name. {newline}{get;~cmd} Avatar - give your pup a new look (alias - look).{newline;2}__Care__:{newline}{get;~cmd} Rest - let your puppy sleep for a while.{newline}{get;~cmd} Feed - feed puppy (once per 24h).{newline}{get;~cmd} Clean - wash your puppy.{newline;2}__Fun__:{newline}{get;~cmd} Play - play with your pup.{newline}**Note** that he will get tired if you do this very often.{newline;2} Pat - slightly pat your puppy.;
+            color:white;
+            footer.text:Next update date - 22.08.2018;
+            timestamp:{time};
+        }}
+}
+{//;Setup next feed time}
+{function;feedtime;
+    {//;Set current time in hours}
+    {set;~time;{time;HH}}
+    {//;Set time from input}
+    {set;~input;{params}}
+    {//;If current time is more than 11PM, then set it to 0}
+    {if;~time;==;24;{set;~time;0}}
+    {//;Set result of curr_time+6}
+    {set;~ttime;{math;+;{get;~time};{get;~input}}}
+    {//;Set next feed time}
+    {if;{get;~ttime};>;24;{set;~ftime;{math;-;{get;~ttime};24}};{set;~ftime;{get;~ttime}}}
+    {set;@pup{userid}ftime;{get;~ftime}}
+}
+{//;On the first run, user needs to confirm the ToU}
+{function;confirm_tou;
+    {exec;tou}
+    {waitmessage;;;{bool;{messagetext};startswith;yes};30}
+}
+{//;Randomization, to determine is puppy clean or not}
+{function;random;
+    {set;~arr;[]}{repeat;{push;~arr;{randint;1;100}};5}
+    {if;{min;{get;~arr}};<;51;{set;@pup{userid}isClean;true};{set;@pup{userid}isClean;false}}
+}
+{if;{get;@pup{userid}isFirstRun};!=;false;{func.confirm_tou}{set;@pup{userid}isFirstRun;false};}
+{//;Get subcommand from user's input}
+{set;~subc;{args;0}}
+{switch;{lower;{get;~subc}};
+    help;
+        {func.help}
+    ;adopt;
+            {if;{get;@pup{userid}own};==;true;You can't have more than one puppy!{return}}
             {embed;
                 {embedbuild;
-                    title:Oops!;
-                    description:{params};
-                    color:Red;
+                    title:You adopted a nice and funny pup!;
+                    description:Don't forget to take care of it!;
+                    color:White;
+                    image.url:{get;@pup{userid}avatar};
                 }
             }
-        }
-    }
-}
-
-{function;pup_view;
-    {if;@pup{get;~view_user}own;==;false;{func.throw_err;This user hasn't adopted their puppy yet.}{return}}
-    {if;{userid;{args}};==;{userid};{set;~view_user;{userid}};{set;~view_user;{userid;{args}}}}
-    {embed;
-        {embedbuild;
-            title:Your pup, {username;{get;~view_user}}!;
-            fields.name:Stats;
-            fields.value:Name: {get;@pup{get;~view_user}name}{newline}Adopt date: {get;@pup{get;~view_user}atime}{newline}Type: {get;@pup{get;~view_user}type}.;
-            thumbnail.url:{get;@pup{get;~view_user}avatar};
-            color:white;
-        }
-    }
-}
-{//;Get subcommand}
-{set;~subcommand;{args;0}}
-
-{//;Provide options based on subcommand input}
-
-{switch;{lower;{get;~subcommand}};
-    ["help","menu"];
-        {embed;
-            {embedbuild;
-                title:Puppies!;
-                fields.name:General subcommands.;
-                fields.value:Adopt - adopt your puppy.{newline}Release - release your puppy.{newline}View `<user>` - view your puppy or pup of specified user.{newline}Shop - buy some stuff for puppy.;
-                fields.inline:true;
-                fields.name:Care subcommands.;
-                fields.value:Rest - Let your pup rest for some time.{newline}Feed - feed your puppy.{newline}Play - play with your puppy.{newline}Pet - pet your puppy.;
-                fields.inline:true;
-                fields.name:Customization;
-                fields.value:Name - give your pup new name.{newline}Avatar - give your pup a new look.;
-                color:white;
-                footer.text:Build {get;~VERSION_NUMBER}-{get;~VERSION_CODE};
-                footer.icon_url:{useravatar};
-                thumbnail.url:https://static1.squarespace.com/static/5819bb2920099e33f325a498/t/584776b9725e25ae983d104b/1481078465774/golden-retriever-dog-puppy-running-towards-camera.jpg;
-                timestamp:{time};
-            }
-        }
-    ;
-    adopt;
-        {if;{get;@pup{userid}own};==;true;{func.throw_err;❌You can't own more than one puppy!{return}}}
-        {embed;
-            {embedbuild;
-                title:Yay!;
-                description:You now have your own pup!{newline}Don't forget about it, or you might lose this one!;
-                color:white;
-                footer.icon_url:{useravatar};
-                footer.text:{username};
-                timestamp:{time};
-            }
-        }
         {set;@pup{userid}own;true}
         {set;@pup{userid}name;Puppy}
-        {set;@pup{userid}avatar;https://static1.squarespace.com/static/5819bb2920099e33f325a498/t/584776b9725e25ae983d104b/1481078465774/golden-retriever-dog-puppy-running-towards-camera.jpg}
-        {set;@pup{userid}atime;["{time;DD}","{time;MM}","{time;YYYY}"]}
-        {set;@pup{userid}feeds_doggo;20}
-        {set;@pup{userid}feeds_rel;100}
-        {set;@pup{userid}type;pup}
-        {func.timeFormat}
-    ;
-    release;
-    {if;{get;@pup{userid}own};==;false;{func.throw_err;You can't release air!}{return}}
-    {if;{get;@pup{userid}type};==;Your old friend;You can't release your friend.{return}}
-    {set;@pup{userid}own;false}
-    {set;@pup{userid}name;No pup.}
-    {set;@pup{userid}avatar;[""]}
-    {embed;
-        {embedbuild;
-            title:Released.;
-            description:That's so sad...;
-            color:black;
-        }
-    }
-    ;
-    view;
-    {if;@pup{get;~view_user}own;==;false;{func.throw_err;This user hasn't adopted their puppy yet.}{return}}
-    {if;{userid;{args;1}};==;{userid};{set;~view_user;{userid}};{set;~view_user;{userid;{args;1}}}}
-    {embed;
-        {embedbuild;
-            title:Your pup, {username;{get;~view_user}}!;
-            fields.name:Stats;
-            fields.value:Name: {get;@pup{get;~view_user}name}{newline}Adopt date: {get;@pup{get;~view_user}atime}{newline}Type: {get;@pup{get;~view_user}type}.;
-            thumbnail.url:{get;@pup{get;~view_user}avatar};
-            color:white;
-        }
-    }
-    ;
-    ["rest","sleep"];
-        {if;@pup{userid}lastRestTime;<=;{time;HH};{func.throw_err;Your pup doesn't needs to sleep now.}{return}}
-        Your pup lies on your knees and start sneezing. Don't move!
-        {set;@pup{userid}balance;{math;+;0{get;@pup{userid}balance};10}}
-    ;
-    feed;
-        {if;@pup{userid}isHungry;==;0;{func.throw_err;Your pup isn't hungry right now!}{return}}
-        {set;@pup{userid}isHungry;0}
-        {set;@pup{userid}feeds;{math;-;0{get;@pup{userid}feeds};1}}
-        Your puppy grows over time as you feed it. It will grow soon.
-        {if;{get;@pup{userid}feeds;==;20;{set;@pup{userid}type;doggo}}}
-        {if;{get;@pup{userid}feeds;==;100;{set;@pup{userid}type;Your old friend.}}}
-    ;
-    pet;
-    {embed;{embedbuild;description:Such a good boy!;image.url:https://www.pets4homes.co.uk/images/articles/4367/large/what-does-it-mean-if-your-dog-growls-when-you-pat-them-59ba421e0884c.jpg}};
-    play;{randchoose;@pup_play_word}{set;@pup{userid}balance;{math;+;0{get;@pup{userid}balance};{randint;1;15}}}
-    ;
-    name;{set;@pup{userid}name;{args;1}}Your pup's new name is {args;1}!;
-    shop;
-    {//;Display all items in shop, 10 positions per category}
+        {set;@pup{userid}avatar;https://www.pixelstalk.net/wp-content/uploads/2016/08/Cute-Puppy-HD-Wallpaper.jpg}
+        {set;@pup{userid}adate;{time;YYYY-MM-DD HH:mm:ss}} 
+    ;release;
+        {if;{get;@pup{userid}own};==;false;What you are trying to release? Air?{return}}
+        {if;{get;@pup{userid}own};==;;What you are trying to release? Air?{return}}
+        Congrats, you released your puppy! (Actually, no, you are an awful person)
+        {set;@pup{userid}own;false}
+        {set;@pup{userid}name;Pup}
+        {set;@pup{userid}avatar;https://www.pixelstalk.net/wp-content/uploads/2016/08/Cute-Puppy-HD-Wallpaper.jpg}
+        {set;@pup{userid}adate;You haven't pup!}
+    ;feed;
+        {if;{get;@pup{userid}own};==;false;What you are trying to feed with dog food? Yourself?{return}}
+        {if;{get;@pup{userid}own};==;;What you are trying to feed with dog food? Yourself?{return}}
+        Your puppy grows! Next feed time in: 6 hours.
+        {func.feedtime;6}
+    ;rest;
+        {if;{get;@pup{userid}d_rest};==;{time;DD};;Your puppy wants to play some more!{return}}
+        {if;{get;@pup{userid}h_rest};==;{time;HH};
+            {set;@pup{userid}sleep;false}{set;@pup{userid}d_rest;{math;+;{time;DD};1}}{set;@pup{userid}h_rest;{time;HH}}Your puppy is laying down to sleep for a while. Come back later!{return};Your puppy doesn't want to sleep now!{return}}
+    ;play;
+        You play with your puppy and you and your little pet become happier!
+    ;pat;
+        You slightly pat your little doggo, and he likes it!
+    ;clean;
+        {if;{get;@pup{userid}clean};==;true;Your pup doesn't want to wash!{return};Your pup is running to bathroom very fast, and 20 mitues later he becomes clean!{set;@pup{userid}clean;true}}
+    ;name;
+        {if;{get;@pup{userid}own};==;false;You don't have a pup to give a name!{return}}
+        {if;{get;@pup{userid}own};==;;You don't have a pup to give a name!{return}}
+        {if;{argslength};>;1;{set;@pup{userid}name;{args;1;n}}👌;Oops, you didn't type a name? {return}}
+    ;["avatar","look"];
+        {if;{argslength};>=;2;;Oops, image not found. Maybe, you didn't provide it?{return}}
+        {if;{get;@pup{userid}own};==;false;You don't have a pup to set new look!{return}}
+        {if;{get;@pup{userid}own};==;;You don't have a pup to set new look!{return}}
+        {if;{regextest;{args;1};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};==;false;Not an image!{return}}
+        {if;{func.valid_image};==;true;;Provided image is invalid or empty!{return}}
+    ;shop;
     {embed;{embedbuild;
-        title:Shop.;
-        description:To buy some items from the shop, you need to type full name of the item.;
-        fields.name:Food;
-        fields.value:{foreach;~item;{get;@pup_shop_food};{get;~item}{newline}};
-        fields.name:Play items;
-        fields.value:{foreach;~item;{get;@pup_shop_play};{get;~item}{newline}};
-        fields.name:Miscellaneous items;
-        fields.value:Under construction;
-        color:white;
-        footer.text:Your balance: {get;@pup{userid}balance} coins.;
+        title:Shop;
+        fields.name:Food-related items;
+        fields.value:Canned meat (5 coins){newline}Fresh meat (15 coins){newline};
     }}
-    {if;{args;1;n};==;;Item not selected!{return}}
-    {switch;{lower;{args;1}};
-        food;
-            {if;{args;2;n};==;{indexof;{args;1;n};{get;@pup_shop_food}};Item doesn't exist!{return};{set;~buy;{get;@pup_shop_food;{indexof;{args;1;n};{get;@pup_shop_food}}}}}
-            {set;~cost;{regexmatch;{get;~buy};\d+/gmi}}
-            {if;{get;@pup{userid}balance};<;{get;~cost};Insufficient coins!{return};The item was bought and {get;~cost} coins were withdrawn from your account.}
-            {set;@pup{userid}balance;{math;-;0{get;@pup{userid}balance};{get;~cost}}}
-        ;
-        play;
-            {if;{args;2;n};==;{indexof;{args;1;n};{get;@pup_shop_play}};Item doesn't exist!{return};{set;~buy;{get;@pup_shop_play;{indexof;{args;1;n};{get;@pup_shop_play}}}}}
-            {set;~cost;{regexmatch;{get;~buy};\d+/gmi}}
-            {if;{get;@pup{userid}balance};<;{get;~cost};Insufficient coins!{return};The item was bought and {get;~cost} coins were withdrawn from your account.}
-            {set;@pup{userid}balance;{math;-;0{get;@pup{userid}balance};{get;~cost}}}
-        ;
-    }
     ;
-    ["avatar","look"];{set;@pup{userid}avatar;{args;1}};
-    {func.pup_view;{args;0;n}}
+    {//;If no subcommand found in input, view}
+    {func.view}
 }

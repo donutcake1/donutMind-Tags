@@ -1,24 +1,8 @@
+{//;Exception tool to display nice and good-looking error output}
 {suppresslookup;true}
-{//;Used to display help for command the tag is called from}
-{if;{iscc};==;true;{set;~cmd;`{prefix}{commandname} help`};{set;~cmd;`{prefix}t {commandname} help`}}
-{//;Get error code}
-{set;~err;{args;0}}
-{//;Get error level}
-{set;~lvl;{args;1}}
-{if;{argslength};>;2;{set;~info;{args;2;n}};{set;~info;No additional info was provided.}}
-{//;If no args provided, then error = UNHANDLED_EXCEPTION, level = CRIT}
-{if;{argslength};==;0;{set;~err;UNHANDLED_EXCEPTION}{set;~lvl;CRIT}}
-{//;Set icon according to error level, default - critical}
-{switch;{lower;{args;1}};
-    info;{set;~url;https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Info_icon-72a7cf.svg/2000px-Info_icon-72a7cf.svg.png};
-    warn;{set;~url;https://www.materialui.co/materialIcons/alert/warning_amber_384x384.png};
-    crit;{set;~url;https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/alert-circle-red-512.png};
-    {set;~url;https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/alert-circle-red-512.png}
-}
-{//;Display embed containing: error code, error level, info}
+{if;{argslength};>;0;{set;~info;{args;0;n}{newline;2}Please, do `b!t {commandname} help`, or `b!t {commandname}`.};{set;~info;Please, do `b!t {commandname} help`, or `b!t {commandname}`.}}
 {embed;{embedbuild;
-    title:Exception;
-    description:Details: {newline}Error code: {upper;{get;~err}}{newline}Error level: {get;~lvl}{newline}Additional details: {get;~info};
-    thumbnail.url:{get;~url};
-    color:red;
+    title:😥Something went wrong!;
+    description:{get;~info};
+    color:white;
 }}
