@@ -10,7 +10,6 @@
                 Paladin;
                     {set;@{userid}.armor.type;{args;1;n}}
                     {set;@{userid}.armor.type.{get;@{userid}.armor.type};{get;@create.platearmor}}
-                
             }
     }
 }
