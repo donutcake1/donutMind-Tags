@@ -1,120 +1,37 @@
-{suppresslookup;true}
-{fallback;Oops, something went wrong. Send {usermention;241612639560531968} a message to notify!}
-{//;Set prefix+iscc+commandame to shorten embed description}
-{if;{iscc};==;false;{set;~cmd;{prefix}t {commandname}};{set;~cmd;{prefix}{commandname}}}
-{//;View user's puppy}
+{//;Constants}
+{set;~default.image;https://cdn.pixabay.com/photo/2016/01/05/17/51/dog-1123016__340.jpg}
+{set;~default.name;Puppy}
+{set;~default.state;Hungry-Clean}
+{if;{args;1;n};==;;{set;~default.user;{userid}};{set;~default.user;{userid;{args;1;n}}}}
+
+{//;Shop constants}
+{set;@pup.items;["Meat","Fish","Dog food","Tennis ball","Frisbee","","","","Raincoat"]}
+
+{//;Check ToS}
+{if;{get;@pup.tos};!=;1;Please read and accept Terms of Use below:{newline}{exec;tou}}
+{if;{messagetext};==;yes;{set;@pup.tos;1};You didn't accept Terms of Use! Aborting...{return}}
+
+{//;View function}
 {function;view;
-    {//;Check if user is matching conditions above}
-    {//;If user is not specified then user is executor}
-    {if;{argslength};>=;2;{set;~user;{userid;{args;1;n}}};{set;~user;{userid}}}
-    {//;If user hasn't puppy, then can't display}
-    {if;{get;@pup{get;~user}own};!=;true;This user released pup and/or not adopted one yet!{newline}Do `{get;~cmd} adopt` to get started!{return}}
     {embed;{embedbuild;
-        title:Here's your pup, {username;{get;~user}}!;
-        description: __**Stats**__:{newline}Name: {get;@pup{get;~user}name}{newline}Adopt date: {get;@pup{get;~user}adate}{newline}Clean: {if;{get;@pup{get;~user}clean};==;true;yes.;no, do `{get;~cmd} clean`, please!};
-        image.url: {get;@pup{get;~user}avatar};
+        title:{get;~default.user}'s puppy;
+        description:Name: {get;@pup.name{userid}}{newline}Adopt date {get;@pup.date{userid}}{newline}Status: {get;@pup.status}Your coins: {get;@pup.coins}.;
+        image.url:{get;@pup.image{userid}};
         color:white;
     }}
 }
-{function;valid_image;
-{if;{logic;!;{regextest;{args;1};/^[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/}};false{return}}
-{set;~r;{logic;!;{regextest;{messageembeds;{get;~msgid}};/^\[\{"fields":\[\{"inline":false,"name":"Malformed JSON","value":"`Invalid embed: Invalid image\.url`"\}\],"type":"rich"\}\]$|"image":\{"url":".+?","width":(?:0,"proxy_url":".+?","height":0|1200,"proxy_url":".+?","height":630)\}/}}}
-{//;edit;{get;~msgid};{if;{argslength};==;1;{get;~r};{if;{get;~r};{args;1};{args;2}}};_delete}
+{//;Undocumented function}
+{//;Remind: Use foreach+regex search if indexof doesn't works}
+{function;purchase;
+    {if;{indexof;{get;@pup.items};{args;1;n}};==;;Item not found in the shop!{return};{set;~item;{get;@pup.items;{indexof;{get;@pup.items};{args;1;n}}}}{set;~price;{get;@pup.items;{indexof;{get;@pup.prices};{args;1;n}}}}}
+    {if;{get;@pup.coins};>;{get;~price};You have bought {get;~item}, cost: {get;~price} coins.;Insufficient coins!{return}}
 }
-{//;Help message}
-{function;help;
+
+{switch;{lower;{args;0}}
+    ;help;
     {embed;{embedbuild;
-            title:List of {commandname} subcommands;
-            description:__General-and-Customize__:{newline}{get;~cmd} Adopt - adopt puppy.{newline}{get;~cmd} Release - release puppy.{newline}{get;~cmd} view <user> - view puppies of other users (if they have one).{newline}{get;~cmd} Name - give your puppy a new name. {newline}{get;~cmd} Avatar - give your pup a new look (alias - look).{newline;2}__Care__:{newline}{get;~cmd} Rest - let your puppy sleep for a while.{newline}{get;~cmd} Feed - feed puppy (once per 24h).{newline}{get;~cmd} Clean - wash your puppy.{newline;2}__Fun__:{newline}{get;~cmd} Play - play with your pup.{newline}**Note** that he will get tired if you do this very often.{newline;2} Pat - slightly pat your puppy.;
-            color:white;
-            footer.text:Next update date - 22.08.2018;
-            timestamp:{time};
-        }}
-}
-{//;Setup next feed time}
-{function;feedtime;
-    {//;Set current time in hours}
-    {set;~time;{time;HH}}
-    {//;Set time from input}
-    {set;~input;{params}}
-    {//;If current time is more than 11PM, then set it to 0}
-    {if;~time;==;24;{set;~time;0}}
-    {//;Set result of curr_time+6}
-    {set;~ttime;{math;+;{get;~time};{get;~input}}}
-    {//;Set next feed time}
-    {if;{get;~ttime};>;24;{set;~ftime;{math;-;{get;~ttime};24}};{set;~ftime;{get;~ttime}}}
-    {set;@pup{userid}ftime;{get;~ftime}}
-}
-{//;On the first run, user needs to confirm the ToU}
-{function;confirm_tou;
-    {exec;tou}
-    {waitmessage;;;{bool;{messagetext};startswith;yes};30}
-}
-{//;Randomization, to determine is puppy clean or not}
-{function;random;
-    {set;~arr;[]}{repeat;{push;~arr;{randint;1;100}};5}
-    {if;{min;{get;~arr}};<;51;{set;@pup{userid}isClean;true};{set;@pup{userid}isClean;false}}
-}
-{if;{get;@pup{userid}isFirstRun};!=;false;{func.confirm_tou}{set;@pup{userid}isFirstRun;false};}
-{//;Get subcommand from user's input}
-{set;~subc;{args;0}}
-{switch;{lower;{get;~subc}};
-    help;
-        {func.help}
-    ;adopt;
-            {if;{get;@pup{userid}own};==;true;You can't have more than one puppy!{return}}
-            {embed;
-                {embedbuild;
-                    title:You adopted a nice and funny pup!;
-                    description:Don't forget to take care of it!;
-                    color:White;
-                    image.url:{get;@pup{userid}avatar};
-                }
-            }
-        {set;@pup{userid}own;true}
-        {set;@pup{userid}name;Puppy}
-        {set;@pup{userid}avatar;https://www.pixelstalk.net/wp-content/uploads/2016/08/Cute-Puppy-HD-Wallpaper.jpg}
-        {set;@pup{userid}adate;{time;YYYY-MM-DD HH:mm:ss}} 
-    ;release;
-        {if;{get;@pup{userid}own};==;false;What you are trying to release? Air?{return}}
-        {if;{get;@pup{userid}own};==;;What you are trying to release? Air?{return}}
-        Congrats, you released your puppy! (Actually, no, you are an awful person)
-        {set;@pup{userid}own;false}
-        {set;@pup{userid}name;Pup}
-        {set;@pup{userid}avatar;https://www.pixelstalk.net/wp-content/uploads/2016/08/Cute-Puppy-HD-Wallpaper.jpg}
-        {set;@pup{userid}adate;You haven't pup!}
-    ;feed;
-        {if;{get;@pup{userid}own};==;false;What you are trying to feed with dog food? Yourself?{return}}
-        {if;{get;@pup{userid}own};==;;What you are trying to feed with dog food? Yourself?{return}}
-        Your puppy grows! Next feed time in: 6 hours.
-        {func.feedtime;6}
-    ;rest;
-        {if;{get;@pup{userid}d_rest};==;{time;DD};;Your puppy wants to play some more!{return}}
-        {if;{get;@pup{userid}h_rest};==;{time;HH};
-            {set;@pup{userid}sleep;false}{set;@pup{userid}d_rest;{math;+;{time;DD};1}}{set;@pup{userid}h_rest;{time;HH}}Your puppy is laying down to sleep for a while. Come back later!{return};Your puppy doesn't want to sleep now!{return}}
-    ;play;
-        You play with your puppy and you and your little pet become happier!
-    ;pat;
-        You slightly pat your little doggo, and he likes it!
-    ;clean;
-        {if;{get;@pup{userid}clean};==;true;Your pup doesn't want to wash!{return};Your pup is running to bathroom very fast, and 20 mitues later he becomes clean!{set;@pup{userid}clean;true}}
-    ;name;
-        {if;{get;@pup{userid}own};==;false;You don't have a pup to give a name!{return}}
-        {if;{get;@pup{userid}own};==;;You don't have a pup to give a name!{return}}
-        {if;{argslength};>;1;{set;@pup{userid}name;{args;1;n}}👌;Oops, you didn't type a name? {return}}
-    ;["avatar","look"];
-        {if;{argslength};>=;2;;Oops, image not found. Maybe, you didn't provide it?{return}}
-        {if;{get;@pup{userid}own};==;false;You don't have a pup to set new look!{return}}
-        {if;{get;@pup{userid}own};==;;You don't have a pup to set new look!{return}}
-        {if;{regextest;{args;1};/\bhttps?:[^)''"]+\.(?:jpg|jpeg|gif|png)(?![a-z/])/g};==;false;Not an image!{return}}
-        {if;{func.valid_image};==;true;;Provided image is invalid or empty!{return}}
-    ;shop;
-    {embed;{embedbuild;
-        title:Shop;
-        fields.name:Food-related items;
-        fields.value:Canned meat (5 coins){newline}Fresh meat (15 coins){newline};
+        title:Pup handbook 101;
+        fields.name:General & Customization;
+        fields.value:Adopt: {get;~cmd} adopt.{newline}
     }}
-    ;
-    {//;If no subcommand found in input, view}
-    {func.view}
 }

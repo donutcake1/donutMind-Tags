@@ -20,9 +20,9 @@
     {switch;
         {lower;{args;1}};
             gif;
-                {exec;cute.gif.data};
+                {randchoose;{get;@gifl}};
             image;
-                {exec;cute.image.data};
+                {randchoose;{get;@imgl}};
             {//;error}
                 `expected 'gif' or 'image' (got invalid)`
     }
