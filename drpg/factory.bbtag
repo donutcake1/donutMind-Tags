@@ -1,2 +1,16 @@
-{//;Factory module for DPRG the Game}
+{//;Factory module for DPRG}
 
+{function;create.armor;
+    {//;Get user class}
+    {set;~user.class;{get;@{userid}.user.class}}
+    {set;~user.subclass;{get;@{userid}.drpg.user.subclass}}
+    {switch;{lower;{get;~user.class}};
+        "Damage Dealer";
+            {switch;{get;~user.subclass};
+                Paladin;
+                    {set;@{userid}.armor.type;{args;1;n}}
+                    {set;@{userid}.armor.type.{get;@{userid}.armor.type};{get;@create.platearmor}}
+                
+            }
+    }
+}

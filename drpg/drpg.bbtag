@@ -67,6 +67,28 @@
     }
 }
 
+{//;Build view menu for user}
+{function;user.view;
+    {embed;
+        {embedbuild;
+            title:{username}'s stats;
+            description:To view your inventory, do `{get;~cmd} user inventory`;
+            fields.name:XP;
+            fields.value:{get;@{userid}.user.xp.current} / {get;@{userid}.user.{get;@{userid}.user.lvl.current}.xp.max};
+            fields.inline:true;
+            fields.name:HP;
+            fields.value:{get;@{userid}.user.hp.current} / {get;@{userid}.user.{get;@{userid}.user.lvl.current}.hp.max};
+            fields.inline:true;
+            fields.name:Mana;
+            fields.value:{get;@{userid}.user.mana.current} / {get;@{userid}.user.{get;@{userid}.user.lvl.current}.mana.max};
+            fields.inline:true;
+            fields.name:Money;
+            fields.value:{get;@{userid}.user.balance} coins.;
+            color:white;
+        }
+    }
+}
+
 {//;Displays all help topics. Use only when needed.}
 {function;help.all;
     {func.help.user}
@@ -89,11 +111,10 @@
             ;{func.help.all}
         }
     ;register;
-    {if;{get;@{userid}.user.drgp.register};==;true;You already registered in game!{return}}
-    {if;{roleid;DRPG Player};==;;Oops, something unexpected happened. Please, ask server admin to add 'DRPG Player' role!{return}}
-    {set;@{userid}.user.drpg.register;true}
-    {roleadd;DRPG Player;{username}}
-    Congratz, you have registered ~~in DRPG Beta Program~~ in DiscordRPG game, and now you can do almost everything you wanted to!
-    ;
-    {func.help.all}   
+    {if;{get;@{userid}.user.drpg.register};==;true;You already registered in game!{return}}
+    {trim;{exec;drpg.register}
+    Congratz, you have registered ~~in DRPG Beta Program~~ in DiscordRPG game, and now you can do almost everything you wanted to!}
+    ;view;
+    {if;{get;@{userid}.user.drpg.register};!=;true;Hmmm, seems that you didn't registered! Do `{get;~cmd} register` for headstart!{return};Please wait, loading required assets... {exec;loading;3}{sleep;3s}{newline}Assets loaded!{newline}Initializing embed builder...{sleep;0.2s}{func.user.view}}
+    ;{func.help.all}   
 }

@@ -19,28 +19,43 @@
 {set;@drpg.factory.recipe.armor;["helmet","necklace","wrist","hands","chest","leggings""boots"]}
 
 {//;Recipes::Armor::Quality::Cloth}
-{set;@drpg.factory.recipe.armor.cloth.defense;{randint;300;500}}
-{set;@drpg.factory.recipe.armor.cloth.intellect;{randint;500;1350}}
-{set;@drpg.factory.recipe.armor.cloth.manaregen;{math;/;{randint;500;750};1000}}
+{set;@create.clotharmor;
+    {function;create.clotharmor;
+        {set;@drpg.factory.recipe.armor.cloth.defense;{randint;300;500}}
+        {set;@drpg.factory.recipe.armor.cloth.intellect;{randint;500;1350}}
+        {set;@drpg.factory.recipe.armor.cloth.manaregen;{math;/;{randint;500;750};1000}}
+    }
+}  
 
 {//;Recipes::Armor::Quality::Leather}
 {//;Leather Armor is for Rogue/Shaman/Druid class, so it might depend on class}
-{if;{get;@drpg.{guildid}.{userid}.class};==;Damage;{set;@drpg.{guildid}.{userid}.stat;["agility",""]}}
-{if;{get;@drpg.{guildid}.{userid}.class};==;Heal;{set;@drpg.{guildid}.{userid}.stat;["intellect","manaregen"]}}
+{set;@create.leatherarmor;
+    {function;create.leatherarmor;
+        {if;{get;@drpg.{guildid}.{userid}.class};==;Damage;{set;@drpg.{guildid}.{userid}.stat;["agility",""]}}
+        {if;{get;@drpg.{guildid}.{userid}.class};==;Heal;{set;@drpg.{guildid}.{userid}.stat;["intellect","manaregen"]}}
 
-{set;@drpg.factory.recipe.armor.leather.defense;{math;*;{get;@drpg.drpg.leatherarmor.multiplier};{randint;450;700}}}
-{set;@drpg.factory.recipe.armor.leather.{get;@drpg.{guildid}.{userid}.stat};{math;*;{get;@drpg.drpg.leatherarmor.multiplier};{randint;450;700}}}
-{set;@drpg.factory.recipe.armor.leather.defense;{math;*;{get;@drpg.drpg.leatherarmor.multiplier};{randint;450;700}}}
-
+        {set;@drpg.factory.recipe.armor.leather.defense;{math;*;{get;@drpg.drpg.leatherarmor.multiplier};{randint;450;700}}}
+        {set;@drpg.factory.recipe.armor.leather.{get;@drpg.{guildid}.{userid}.stat};{math;*;{get;@drpg.drpg.leatherarmor.multiplier};{randint;450;700}}}
+        {set;@drpg.factory.recipe.armor.leather.defense;{math;*;{get;@drpg.drpg.leatherarmor.multiplier};{randint;450;700}}}
+    }
+}
 {//;Recipes::Armor::Quality::Mail}
 {//;Also depends on the class: Healer/Damage Dealer}
-{if;{get;@drpg.{guildid}.{userid}.class};==;Damage;{set;@drpg.{guildid}.{userid}.stat;["agility",""]}}
-{if;{get;@drpg.{guildid}.{userid}.class};==;Heal;{set;@drpg.{guildid}.{userid}.stat;["intellect","manaregen"]}}
+{set;@create.mailarmor;
+    {function;create.mailarmor;
+        {if;{get;@drpg.{guildid}.{userid}.class};==;Damage;{set;@drpg.{guildid}.{userid}.stat;["agility",""]}}
+        {if;{get;@drpg.{guildid}.{userid}.class};==;Heal;{set;@drpg.{guildid}.{userid}.stat;["intellect","manaregen"]}}
 
-{set;@drpg.factory.recipe.armor.mail.defense;{math;*;{get;@drpg.drpg.mailarmor.multiplier};{randint;650;1100}}}
-{set;@drpg.factory.recipe.armor.mail.{get;@drpg.{guildid}.{userid}.stat};{math;*;{get;@drpg.drpg.mailarmor.multiplier};{randint;450;700}}}
-{set;@drpg.factory.recipe.armor.mail.defense;{math;*;{get;@drpg.drpg.mailarmor.multiplier};{randint;450;700}}}
+        {set;@drpg.factory.recipe.armor.mail.defense;{math;*;{get;@drpg.drpg.mailarmor.multiplier};{randint;650;1100}}}
+        {set;@drpg.factory.recipe.armor.mail.{get;@drpg.{guildid}.{userid}.stat};{math;*;{get;@drpg.drpg.mailarmor.multiplier};{randint;450;700}}}
+        {set;@drpg.factory.recipe.armor.mail.defense;{math;*;{get;@drpg.drpg.mailarmor.multiplier};{randint;450;700}}}
+    }
+}
 
 {//;Recipes::Armor::Quality::Plate}
-{set;@drpg.factory.recipe.armor.mail.defense;{math;*;{get;@drpg.drpg.platearmor.multiplier};{randint;870;1350}}}
-{set;@drpg.factory.recipe.armor.mail.strength;{math;*;{get;@drpg.drpg.platearmor.multiplier};{randint;450;700}}}
+{set;@create.platearmor;
+    {function;create.platearmor;
+        {set;@drpg.factory.recipe.armor.mail.defense;{math;*;{get;@drpg.drpg.platearmor.multiplier};{randint;870;1350}}}
+        {set;@drpg.factory.recipe.armor.mail.strength;{math;*;{get;@drpg.drpg.platearmor.multiplier};{randint;450;700}}}
+    }
+}
