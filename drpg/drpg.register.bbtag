@@ -1,6 +1,0 @@
-{//;Register module, usable as a standalone tag/cc}
-
-{//;Search for a 'DRPG' role}
-{if;{rolename;123};!=;DRPG;Creating DRPG role, please wait... {exec;loading;3}{newline}{void;{rolecreate;DRPG;2defcc;3072}};{roleadd;{rolename;DRPG};{username}}}
-
-{set;@{userid}.user.drpg.register;true}
