@@ -1,6 +1,0 @@
-{fallback;Unexpected error in module `regexp`!}
-
-{if;!=;regexp;{commandname};;{embed;{embedbuild;title:Something went wrong.;description:Perhaps, this tag is not expected you running it as a standalone tag?{newline}Total run attempts: {get;@donut_regexp_prevent}.;}}{return}}
-{set;@donut_regexp_prevent;{math;+;0{get;@donut_regexp_prevent};1}}
-
-{regexmatch;{args;1;n};{args;0}/gmi}

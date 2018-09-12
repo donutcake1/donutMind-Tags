@@ -2,36 +2,33 @@
 {set;~default.image;https://cdn.pixabay.com/photo/2016/01/05/17/51/dog-1123016__340.jpg}
 {set;~default.name;Puppy}
 {set;~default.state;Hungry-Clean}
-{if;{args;1;n};==;;{set;~default.user;{userid}};{set;~default.user;{userid;{args;1;n}}}}
+
+{//;Set user who executed command if no other users specified}
+{if;{argslength};>;1;{set;~user;{userid;{args}}};{set;~user;{userid}}}
 
 {//;Shop constants}
 {set;@pup.items;["Meat","Fish","Dog food","Tennis ball","Frisbee","","","","Raincoat"]}
 
-{//;Check ToS}
-{if;{get;@pup.tos};!=;1;Please read and accept Terms of Use below:{newline}{exec;tou}}
-{if;{messagetext};==;yes;{set;@pup.tos;1};You didn't accept Terms of Use! Aborting...{return}}
-
 {//;View function}
 {function;view;
     {embed;{embedbuild;
-        title:{get;~default.user}'s puppy;
-        description:Name: {get;@pup.name{userid}}{newline}Adopt date {get;@pup.date{userid}}{newline}Status: {get;@pup.status}Your coins: {get;@pup.coins}.;
-        image.url:{get;@pup.image{userid}};
+        title:{username;{get;~user}}'s puppy;
+        description:Name: {get;@pup.name{get;~user}}{newline}Adopt date {get;@pup.date{get;~user}}{newline}Status: {get;@pup.status{get;~user}};
+        image.url:{get;@pup.image{get;~user}};
         color:white;
     }}
 }
-{//;Undocumented function}
-{//;Remind: Use foreach+regex search if indexof doesn't works}
-{function;purchase;
-    {if;{indexof;{get;@pup.items};{args;1;n}};==;;Item not found in the shop!{return};{set;~item;{get;@pup.items;{indexof;{get;@pup.items};{args;1;n}}}}{set;~price;{get;@pup.items;{indexof;{get;@pup.prices};{args;1;n}}}}}
-    {if;{get;@pup.coins};>;{get;~price};You have bought {get;~item}, cost: {get;~price} coins.;Insufficient coins!{return}}
-}
 
-{switch;{lower;{args;0}}
-    ;help;
+{switch;{lower;{args;0}};
+    help;
     {embed;{embedbuild;
         title:Pup handbook 101;
         fields.name:General & Customization;
-        fields.value:Adopt: {get;~cmd} adopt.{newline}
-    }}
+        fields.value:Adopt: {get;~cmd} adopt.{newline};
+        color:white;
+    }};
+    view;{func.view};
+    release;{exec;__donutbackend}{func.puppy_reset};
+    adopt;{exec;__donutbackend}{func.puppy_adopt};
+    {func.view}
 }

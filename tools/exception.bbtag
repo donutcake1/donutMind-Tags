@@ -1,8 +1,0 @@
-{//;Exception tool to display nice and good-looking error output}
-{suppresslookup;true}
-{if;{argslength};>;0;{set;~info;{args;0;n}{newline;2}Please, do `b!t {commandname} help`, or `b!t {commandname}`.};{set;~info;Please, do `b!t {commandname} help`, or `b!t {commandname}`.}}
-{embed;{embedbuild;
-    title:😥Something went wrong!;
-    description:{get;~info};
-    color:white;
-}}

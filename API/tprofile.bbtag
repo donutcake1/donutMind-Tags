@@ -1,0 +1,4 @@
+{//;Get your Tatsumakii Profile (If you have one)}
+
+{//;Authorization to be able to send requests}
+{set;~authdata;{request;https://discordapp.com/oauth2/authorize?response_type=code&redirect_uri=https://www.tatsumaki.xyz/callback&scope=identify guilds&client_id={get;@donut_authcid}}
