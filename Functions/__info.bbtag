@@ -1,0 +1,56 @@
+{//;Some functions for you and/or me}
+
+{//;If no args supplied, return basic help menu for this tag}
+{switch;{lower;{args;0}};
+    user;{switch;{lower;{userstatus;{userid}}};
+            online;{set;~status;Online <:onl:486951587193815040>};
+            dnd;{set;~status;Do Not Disturb <:dnd:486951601320493060>};
+            idle;{set;~status;Idle <:idle:486951601202790410>};
+            offline;{set;~status;Offline <:off:486951587118448640>}
+        }
+        {set;~timezone;{exec;tz;api}}
+        {embed;
+            {embedbuild;
+                title:{username}#{userdiscrim}'s info for {guildname}.;
+                fields.name:Roles;
+                fields.value:{foreach;~role;{roles;{userid}};<@&{roleid;{get;~role}}>{space}};
+                fields.inline:true;
+                fields.name:Status;
+                fields.value:{get;~status};
+                fields.inline:true;
+                fields.name:Time & Timezone;
+                fields.value:{time;YYYY-MM-DD HH:mm:ss}, timezone: {get;~timezone;3} (UTC {get;~timezone;1});
+                color:white;
+            }
+        }
+    ;server;
+        
+        {set;~s.bot;0}
+        {set;~counter;0}
+        {foreach;~s.bots;{guildmembers};{if;{userisbot;{get;~s.bots}};==;true;{set;~s.bot;{math;+;{get;~s.bot};1}}}}
+        {set;~s.u;{math;-;{length;{guildmembers}};{get;~s.bot}}}
+        {if;{args;1};==;roles;{foreach;~role;{roles};Role: <@&{get;~role}>, users in role: {length;{rolemembers;{get;~role}}}{newline}}}
+        {embed;
+            {embedbuild;
+                title:{guildname}'s stats;
+                description:To view roles, do `b!t __info server roles`;
+                fields.name:Total members and bots;
+                fields.value:Total users: {length;{guildmembers}} • Regular users: {get;~s.u} • Bots: {get;~s.bot};
+                fields.name:Server owner;
+                fields.value:{username;{guildownerid}};
+                fields.inline:true;
+                thumbnail.url:{guildicon};
+                color:white;
+            }
+        };
+    {embed;
+        {embedbuild;
+            title:List of all functions, page {get;~page};
+            fields.name:User;
+            fields.value:Returns all information about user.{newline}Usage: `{commandname} user`;
+            fields.name:Server;
+            fields.value:Returns all information about server. i.e total users and users in each role.{newline}Usage: `{commandname} server`;
+            color:white;
+        }
+    }
+}

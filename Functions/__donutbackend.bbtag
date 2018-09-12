@@ -1,0 +1,17 @@
+{//;Create puppy}
+{function;puppy_adopt;
+    {set;@puppy.own;yes}
+    {set;@puppy.image;https://cdn.pixabay.com/photo/2016/01/05/17/51/dog-1123016__340.jpg}
+    {set;@puppy.name;Doggo}
+    {set;@puppy.status;["Full-fed","Clean"]}
+    {set;@puppy.coins;50}
+}
+
+{//;Destroy puppy}
+{function;puppy_release;
+    {set;@puppy.own;no}
+    {set;@puppy.image;https://cdn.pixabay.com/photo/2016/01/05/17/51/dog-1123016__340.jpg}
+    {set;@puppy.name;Doggo}
+    {set;@puppy.status;["Hungry","Dirty"]}
+    {set;@puppy.coins;50}
+}

@@ -1,0 +1,84 @@
+{//;
+    -------------------------------------------------
+    |       Discord Status - Tag (ver. 0.1)         |
+    |                                               |
+    |           Created by donutMind                |
+    -------------------------------------------------
+}
+
+{//;Set URLs for requests}
+{set;~BaseURL.Incidents;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json}
+{set;~BaseURL.Summary;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json}
+{set;~BaseURL.Status;https://srhpyqt94yxb.statuspage.io/api/v2/status.json}
+
+{//;Extract status data: Timestamp, Indicator, Description}
+{set;~Status.Description;{jget;{request;{get;~BaseURL.Status}};body.status.description}}
+{set;~Status.Indicator;{jget;{request;{get;~BaseURL.Status}};body.status.indicator}}
+{set;~Status.UpdatedTime;{time;YYYY-MM-DD HH:mm:ss}}
+{set;~Status.OriginalTimestamp;{jget;{request;{get;~BaseURL.Status}};body.page.updated_at}}
+
+{//;Extract summary data: Status data + API|Gateway|CloudFlare|Media|Voice name + status}
+{set;~Summary.TotalIncidents;{length;{jget;{request;{get;~BaseURL.Summary}};body.incidents}}}
+{set;~Summary.Description;{jget;{request;{get;~BaseURL.Summary}};body.status.description}}
+{set;~Summary.Indicator;{jget;{request;{get;~BaseURL.Summary}};body.status.indicator}}
+{set;~Summary.Component.API;["{jget;{request;{get;~BaseURL.Summary}};body.components.0.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.0.status}"]}
+{set;~Summary.Component.Gateway;["{jget;{request;{get;~BaseURL.Summary}};body.components.3.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.3.status}"]}
+{set;~Summary.Component.CloudFlare;["{jget;{request;{get;~BaseURL.Summary}};body.components.4.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.4.status}"]}
+{set;~Summary.Component.Media;["{jget;{request;{get;~BaseURL.Summary}};body.components.6.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.6.status}"]}
+{set;~Summary.Component.Voice;["{jget;{request;{get;~BaseURL.Summary}};body.components.8.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.8.status}"]}
+
+{//;Extract incidents data: last 2 incidents}
+{set;~Incident.One.Name;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.name}}
+{set;~Incident.One.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.status}}
+{set;~Incident.One.Details.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.incident_updates.0.status}}
+{set;~Incident.One.Details.ResolveStatus;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.incident_updates.0.body}}
+{set;~Incident.One.Details.AffectedComponents;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.incident_updates.0.affected_components}}
+{set;~Incident.Two.Name;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.name}}
+{set;~Incident.Two.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.status}}
+{set;~Incident.Two.Details.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.incident_updates.0.status}}
+{set;~Incident.Two.Details.ResolveStatus;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.incident_updates.0.body}}
+{set;~Incident.Two.Details.AffectedComponents;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.incident_updates.0.affected_components}}
+
+{//;TODO: Provide API}
+
+{//;Display API Status}
+{switch;{lower;{args;0}};
+    ["status","brief"];
+        {embed;
+            {embedbuild;
+                title:Discord Status (Brief);
+                description:Description: {get;~Status.Description}{newline}Indicator: {get;~Status.Indicator}{newline}Update time: {get;~Status.UpdatedTime}{newline}Original timestamp: {get;~Status.OriginalTimestamp};
+                color:white;
+            }
+        };
+    ["summary","detail","detailed"];
+        {embed;
+            {embedbuild;
+                title:Discord Status (Detailed);
+                fields.name:Components status;
+                fields.value:{get;~Summary.Component.API;0} - {get;~Summary.Component.API;1}{newline}{get;~Summary.Component.Gateway;0} - {get;~Summary.Component.Gateway;1}{newline}{get;~Summary.Component.CloudFlare;0} - {get;~Summary.Component.CloudFlare;1}{newline}{get;~Summary.Component.Media;0} - {get;~Summary.Component.Media;1}{newline}{get;~Summary.Component.Voice;0} - {get;~Summary.Component.Voice;1};
+                fields.name:Other info;
+                fields.value:Total Incidents: {get;~Summary.TotalIncidents}{newline}Description: {get;~Summary.Description}{newline}Indicator: {get;~Summary.Indicator};
+                color:yellow;
+            }
+        };
+    ["incident","incidents"];
+        {embed;
+            {embedbuild;
+                title:Last 2 Incidents;
+                fields.name:Incident 1;
+                fields.value:Name: {get;~Incident.One.Name}{newline}**Details**: {newline}Status: {get;~Incident.One.Details.Status}{newline}Current Status: {get;~Incident.One.Details.ResolveStatus}{newline}Affected components: {get;~Incident.One.Details.AffectedComponents};
+                fields.name:Incident 2;
+                fields.value:Name: {get;~Incident.Two.Name}{newline}**Details**: {newline}Status: {get;~Incident.Two.Details.Status}{newline}Current Status: {get;~Incident.Two.Details.ResolveStatus}{newline}Affected components: {get;~Incident.Two.Details.AffectedComponents};
+                color:red;
+            }
+        };
+    {embed;
+        {embedbuild;
+            title:Discord Status help.;
+            description:__Get brief status__: {newline}`b!t discordstatus status|brief`{newline}__Get detailed status__:{newline}`b!t discordstatus summary|detail|detailed`{newline}__Get name, status and details of two last incidents__:{newline}`b!t discordstatus incident|incidents`;
+            color:white;
+            footer.text:[View code](https://github.com/donutmind/)
+        }
+    }
+}

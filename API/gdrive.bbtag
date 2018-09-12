@@ -1,0 +1,15 @@
+{//;Display help if no args provided}
+{if;{argslength};==;0;
+    {embed;{embedbuild;
+        title:Oops!
+        description:You didn't provide option and URL!{newline}Usage: `b!t gdrive upload/download <url>`.{newline}Upload requires login/pass: `b!t gdrive auth -l/--login <e-mail> -p/--password <password>`. Message with auth credentials will be deleted.;
+        color:000000;
+    }}
+}
+
+{//;Base API URL}
+{set;~base.url;https://googleapis.com/drive/v3/}
+
+{//;Set method depended on user's choice}
+{if;{args;0};==;download;{set;~method;files.get}}
+{if;{args;0}}
