@@ -1,84 +1,87 @@
 {//;
     -------------------------------------------------
-    |       Discord Status - Tag (ver. 0.1)         |
+    |       Discord Status - Tag (ver. 0.3)         |
     |                                               |
     |           Created by donutMind                |
     -------------------------------------------------
 }
 
-{//;Set URLs for requests}
-{set;~BaseURL.Incidents;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json}
-{set;~BaseURL.Summary;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json}
-{set;~BaseURL.Status;https://srhpyqt94yxb.statuspage.io/api/v2/status.json}
+{//;
+    How it works:
+    1. Retrieve data based on user's choice
+    2. Process data needed by user's choice
+    3. Build an embed with result
+    ------
+    For example, user choose 'status'. Code below executes function 'status' and displays the result
+}
 
-{//;Extract status data: Timestamp, Indicator, Description}
-{set;~Status.Description;{jget;{request;{get;~BaseURL.Status}};body.status.description}}
-{set;~Status.Indicator;{jget;{request;{get;~BaseURL.Status}};body.status.indicator}}
-{set;~Status.UpdatedTime;{time;YYYY-MM-DD HH:mm:ss}}
-{set;~Status.OriginalTimestamp;{jget;{request;{get;~BaseURL.Status}};body.page.updated_at}}
-
-{//;Extract summary data: Status data + API|Gateway|CloudFlare|Media|Voice name + status}
-{set;~Summary.TotalIncidents;{length;{jget;{request;{get;~BaseURL.Summary}};body.incidents}}}
-{set;~Summary.Description;{jget;{request;{get;~BaseURL.Summary}};body.status.description}}
-{set;~Summary.Indicator;{jget;{request;{get;~BaseURL.Summary}};body.status.indicator}}
-{set;~Summary.Component.API;["{jget;{request;{get;~BaseURL.Summary}};body.components.0.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.0.status}"]}
-{set;~Summary.Component.Gateway;["{jget;{request;{get;~BaseURL.Summary}};body.components.3.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.3.status}"]}
-{set;~Summary.Component.CloudFlare;["{jget;{request;{get;~BaseURL.Summary}};body.components.4.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.4.status}"]}
-{set;~Summary.Component.Media;["{jget;{request;{get;~BaseURL.Summary}};body.components.6.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.6.status}"]}
-{set;~Summary.Component.Voice;["{jget;{request;{get;~BaseURL.Summary}};body.components.8.name}","{jget;{request;{get;~BaseURL.Summary}};body.components.8.status}"]}
-
-{//;Extract incidents data: last 2 incidents}
-{set;~Incident.One.Name;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.name}}
-{set;~Incident.One.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.status}}
-{set;~Incident.One.Details.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.incident_updates.0.status}}
-{set;~Incident.One.Details.ResolveStatus;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.incident_updates.0.body}}
-{set;~Incident.One.Details.AffectedComponents;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.0.incident_updates.0.affected_components}}
-{set;~Incident.Two.Name;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.name}}
-{set;~Incident.Two.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.status}}
-{set;~Incident.Two.Details.Status;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.incident_updates.0.status}}
-{set;~Incident.Two.Details.ResolveStatus;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.incident_updates.0.body}}
-{set;~Incident.Two.Details.AffectedComponents;{jget;{request;{get;~BaseURL.Incidents}};body.incidents.1.incident_updates.0.affected_components}}
-
-{//;TODO: Provide API}
+{//;
+    Changelog:
+    Version 0.1 - Init
+    Version 0.2 - Speed up result output
+	Version 0.3 - More speed!
+}
 
 {//;Display API Status}
 {switch;{lower;{args;0}};
     ["status","brief"];
+        {set;~Status.Description;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/status.json};body.status.description}}
+        {set;~Status.Indicator;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/status.json};body.status.indicator}}
+        {set;~Status.UpdatedTime;{time;YYYY-MM-DD HH:mm:ss}}
         {embed;
             {embedbuild;
                 title:Discord Status (Brief);
-                description:Description: {get;~Status.Description}{newline}Indicator: {get;~Status.Indicator}{newline}Update time: {get;~Status.UpdatedTime}{newline}Original timestamp: {get;~Status.OriginalTimestamp};
+                description:Description: {get;~Status.Description}{newline}Indicator: {get;~Status.Indicator}{newline}Updated at: {get;~Status.UpdatedTime};
                 color:white;
             }
         };
     ["summary","detail","detailed"];
+        {set;~Summary.TotalIncidents;{length;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.incidents}}}
+        {set;~Summary.Description;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.status.description}}
+        {set;~Summary.Indicator;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.status.indicator}}
+        {set;~Summary.Components.Name;["{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.0.name}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.3.name}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.4.name}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.6.name}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.8.name}"]}
+        {set;~Summary.Components.Status;["{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.0.status}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.3.status}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.4.status}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.6.status}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/summary.json};body.components.8.status}"]}
+
         {embed;
             {embedbuild;
                 title:Discord Status (Detailed);
                 fields.name:Components status;
-                fields.value:{get;~Summary.Component.API;0} - {get;~Summary.Component.API;1}{newline}{get;~Summary.Component.Gateway;0} - {get;~Summary.Component.Gateway;1}{newline}{get;~Summary.Component.CloudFlare;0} - {get;~Summary.Component.CloudFlare;1}{newline}{get;~Summary.Component.Media;0} - {get;~Summary.Component.Media;1}{newline}{get;~Summary.Component.Voice;0} - {get;~Summary.Component.Voice;1};
+                fields.value:{get;~Summary.Components.Name;0} - {get;~Summary.Components.Status;0}{newline}{get;~Summary.Components.Name;1} - {get;~Summary.Components.Status;1}{newline}{get;~Summary.Components.Name;2} - {get;~Summary.Components.Status;2}{newline}{get;~Summary.Components.Name;3} - {get;~Summary.Components.Status;3}{newline}{get;~Summary.Components.Name;4} - {get;~Summary.Components.Status;4};
                 fields.name:Other info;
                 fields.value:Total Incidents: {get;~Summary.TotalIncidents}{newline}Description: {get;~Summary.Description}{newline}Indicator: {get;~Summary.Indicator};
                 color:yellow;
             }
         };
     ["incident","incidents"];
+  		{set;~BaseURL.Incidents;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json}
+        {set;~Incident.One.Name;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.0.name}}
+        {set;~Incident.One.Status;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.0.status}}
+        {set;~Incident.One.Details.Status;["{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.0.incident_updates.0.status}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.0.incident_updates.0.body}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.0.incident_updates.0.affected_components}"]}
+        {set;~Incident.Two.Name;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.1.name}}
+        {set;~Incident.Two.Status;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.1.status}}
+        {set;~Incident.Two.Details.Status;["{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.1.incident_updates.0.status}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.1.incident_updates.0.body}","{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/incidents.json};body.incidents.1.incident_updates.0.affected_components}"]}
         {embed;
             {embedbuild;
                 title:Last 2 Incidents;
                 fields.name:Incident 1;
-                fields.value:Name: {get;~Incident.One.Name}{newline}**Details**: {newline}Status: {get;~Incident.One.Details.Status}{newline}Current Status: {get;~Incident.One.Details.ResolveStatus}{newline}Affected components: {get;~Incident.One.Details.AffectedComponents};
+                fields.value:Name: {get;~Incident.One.Name}{newline}**Details**: {newline}Status: {get;~Incident.One.Details.Status;0}{newline}Current Status: {get;~Incident.One.Details.Status;1}{newline}Affected components: {get;~Incident.One.Details.Status;2};
                 fields.name:Incident 2;
-                fields.value:Name: {get;~Incident.Two.Name}{newline}**Details**: {newline}Status: {get;~Incident.Two.Details.Status}{newline}Current Status: {get;~Incident.Two.Details.ResolveStatus}{newline}Affected components: {get;~Incident.Two.Details.AffectedComponents};
+                fields.value:Name: {get;~Incident.Two.Name}{newline}**Details**: {newline}Status: {get;~Incident.Two.Details.Status;0}{newline}Current Status: {get;~Incident.Two.Details.Status;1}{newline}Affected components: {get;~Incident.Two.Details.Status;2};
                 color:red;
             }
         };
+    api;
+        Whoops, it's still testing.;
     {embed;
         {embedbuild;
             title:Discord Status help.;
-            description:__Get brief status__: {newline}`b!t discordstatus status|brief`{newline}__Get detailed status__:{newline}`b!t discordstatus summary|detail|detailed`{newline}__Get name, status and details of two last incidents__:{newline}`b!t discordstatus incident|incidents`;
+            fields.name:Commands;
+            fields.value:Current status (Brief): `b!t discordstatus status|brief`{newline}Current status (Detail): `b!t discordstatus summary|detail|detailed`{newline}Last two incidents data: `b!t discordstatus incident|incidents`;
+            fields.name:API;
+            fields.value:Yes, we have an API! It sends all data used by the tag.{newline}Do `b!t discordstatus api` to see what you'll get!{newline}You can also do `b!t discordstatus api status|summary|components|incident` to get specified data;
+            fields.name:Source code;
+            fields.value:[Click on me!](https://github.com/donutcake1/donutMind-Tags/blob/master/API/dstatus.bbtag);
             color:white;
-            footer.text:[View code](https://github.com/donutmind/)
         }
     }
 }
