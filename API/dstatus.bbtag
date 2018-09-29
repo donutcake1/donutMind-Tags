@@ -6,23 +6,18 @@
     -------------------------------------------------
 }
 
-{//;
-    How it works:
-    1. Retrieve data based on user's choice
-    2. Process data needed by user's choice
-    3. Build an embed with result
-    ------
-    For example, user choose 'status'. Code below executes function 'status' and displays the result
-}
+{//;Changelog:
 
-{//;
-    Changelog:
     Version 0.1 - Init
     Version 0.2 - Speed up result output
 	Version 0.3 - More speed!
 }
 
-{//;Display API Status}
+{//; TODO List:
+    1. Add API support;
+}
+
+{//;Display DiscordAPI Status}
 {switch;{lower;{args;0}};
     ["status","brief"];
         {set;~Status.Description;{jget;{request;https://srhpyqt94yxb.statuspage.io/api/v2/status.json};body.status.description}}
@@ -71,7 +66,7 @@
             }
         };
     api;
-        Whoops, it's still testing.;
+        Whoops, it's still in testing.;
     {embed;
         {embedbuild;
             title:Discord Status help.;
